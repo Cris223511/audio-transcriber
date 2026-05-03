@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+venv/
+.venv/
+
+# Archivos de audio subidos
+uploads/
+*.mp3
+*.wav
+*.m4a
+
+# Modelos de Whisper (pesados)
+~/.cache/whisper/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

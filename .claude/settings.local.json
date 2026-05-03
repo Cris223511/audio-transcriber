@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m py_compile app.py)",
+      "Bash(python app.py)",
+      "Bash(netstat -ano)",
+      "PowerShell(Stop-Process -Id 29224 -Force)",
+      "Bash(Get-ChildItem -Path \"e:\\\\Mis Proyectos\\\\Programación\\\\Ejercicios Python\\\\audio-transcriber\" -Recurse -Force)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "WebSearch",
+      "WebFetch(domain:appusil.com)",
+      "Bash(not exist *)",
+      "Bash(gh auth *)",
+      "Bash(gh *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "PowerShell(gh repo *)",
+      "Bash(git reset *)",
+      "Bash(git update-ref *)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd \"E:\\Mis Proyectos\\Programaci\\u00f3n\\Ejercicios Python\\audio-transcriber\" && git add -A && git diff --cached --quiet || git commit -m \"auto: cambios desde Claude Code\" && git push origin master"
+          }
+        ]
+      }
+    ]
+  }
+}

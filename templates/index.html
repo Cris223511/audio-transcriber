@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcriptor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #111113;
+            color: #ececec;
+            min-height: 100vh;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        .app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .header-left h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .header-left p {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .mode-toggle {
+            display: flex;
+            background: #1a1a1c;
+            border-radius: 8px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .mode-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            color: #888;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .mode-btn.active {
+            background: #2a2a2c;
+            color: #fff;
+        }
+
+        .mode-btn:hover:not(.active) {
+            color: #bbb;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 20px;
+        }
+
+        .left-panel,
+        .right-panel {
+            min-width: 0;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 280px 1fr;
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .app {
+                padding: 28px 18px;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .app {
+                padding: 20px 12px;
+            }
+
+            .header {
+                margin-bottom: 20px;
+                gap: 12px;
+            }
+
+            .header-left h1 {
+                font-size: 20px;
+            }
+
+            .header-left p {
+                font-size: 13px;
+            }
+
+            .mode-toggle {
+                width: 100%;
+            }
+
+            .mode-btn {
+                flex: 1;
+                padding: 8px 12px;
+            }
+
+            .card {
+                padding: 16px;
+                border-radius: 10px;
+            }
+
+            .dropzone {
+                padding: 24px 14px;
+            }
+
+            .result-card {
+                padding: 14px;
+            }
+
+            .result-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .result-filename {
+                font-size: 12px;
+                word-break: break-all;
+            }
+
+            .result-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .btn-action {
+                flex: 1 1 calc(50% - 3px);
+                justify-content: center;
+                padding: 9px 8px;
+            }
+
+            .result-text {
+                font-size: 16px;
+                padding: 12px;
+                min-height: 160px;
+                max-height: 320px;
+            }
+
+            .log-box {
+                height: 180px;
+            }
+
+            .tab-btn {
+                padding: 7px 10px;
+                font-size: 11px;
+            }
+
+            .toast {
+                left: 12px;
+                right: 12px;
+                bottom: 12px;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-left h1 {
+                font-size: 18px;
+            }
+
+            .btn-action {
+                font-size: 11px;
+                padding: 8px 6px;
+            }
+
+            .btn-action svg {
+                width: 12px;
+                height: 12px;
+            }
+
+            .single-file-name,
+            .queue-name {
+                font-size: 11px;
+            }
+        }
+
+        .card {
+            background: #1a1a1c;
+            border: 1px solid #2a2a2c;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .card-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+        }
+
+        .dropzone {
+            border: 1px dashed #3a3a3c;
+            border-radius: 10px;
+            padding: 32px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dropzone:hover,
+        .dropzone.active {
+            border-color: #555;
+            background: #1f1f21;
+        }
+
+        .dropzone-icon {
+            width: 40px;
+            height: 40px;
+            background: #252528;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+        }
+
+        .dropzone-icon svg {
+            width: 20px;
+            height: 20px;
+            color: #888;
+        }
+
+        .dropzone-text {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .dropzone-text strong {
+            color: #ccc;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .queue-section {
+            display: none;
+            margin-top: 16px;
+        }
+
+        .queue-section.visible {
+            display: block;
+        }
+
+        .queue-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .queue-title {
+            font-size: 12px;
+            color: #888;
+        }
+
+        .queue-count {
+            font-size: 11px;
+            color: #666;
+            background: #252528;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .queue-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .queue-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .queue-list::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .queue-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #222224;
+            border-radius: 8px;
+            margin-bottom: 6px;
+        }
+
+        .queue-item.processing {
+            background: #1a2520;
+            border: 1px solid #2a3530;
+        }
+
+        .queue-item.completed {
+            opacity: 0.5;
+        }
+
+        .queue-item.error {
+            background: #251a1a;
+            border: 1px solid #352a2a;
+        }
+
+        .queue-icon {
+            width: 32px;
+            height: 32px;
+            background: #2a2a2c;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .queue-icon svg {
+            width: 16px;
+            height: 16px;
+            color: #666;
+        }
+
+        .queue-icon.processing {
+            background: #1a3025;
+        }
+
+        .queue-icon.processing svg {
+            color: #5a9;
+        }
+
+        .queue-icon.completed {
+            background: #1a301a;
+        }
+
+        .queue-icon.completed svg {
+            color: #5a5;
+        }
+
+        .queue-icon.error {
+            background: #301a1a;
+        }
+
+        .queue-icon.error svg {
+            color: #a55;
+        }
+
+        .queue-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .queue-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: #ccc;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .queue-status {
+            font-size: 11px;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .queue-remove {
+            background: none;
+            border: none;
+            color: #555;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .queue-remove:hover {
+            color: #e55;
+        }
+
+        .single-file {
+            display: none;
+            background: #222224;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-top: 14px;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .single-file.visible {
+            display: flex;
+        }
+
+        .single-file-icon {
+            width: 36px;
+            height: 36px;
+            background: #2a2a2c;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .single-file-icon svg {
+            width: 18px;
+            height: 18px;
+            color: #666;
+        }
+
+        .single-file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .single-file-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: #ccc;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .single-file-size {
+            font-size: 11px;
+            color: #555;
+            margin-top: 2px;
+        }
+
+        .single-file-remove {
+            background: none;
+            border: none;
+            color: #555;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+        }
+
+        .single-file-remove:hover {
+            color: #e55;
+        }
+
+        .btn-start {
+            width: 100%;
+            padding: 12px 20px;
+            background: #ececec;
+            color: #111;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-start:hover:not(:disabled) {
+            opacity: 0.9;
+        }
+
+        .btn-start:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .progress-mini {
+            margin-top: 14px;
+            display: none;
+        }
+
+        .progress-mini.visible {
+            display: block;
+        }
+
+        .progress-mini-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 6px;
+        }
+
+        .progress-mini-track {
+            height: 4px;
+            background: #252528;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-mini-fill {
+            height: 100%;
+            background: #ececec;
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .tabs-container {
+            display: none;
+        }
+
+        .tabs-container.visible {
+            display: block;
+        }
+
+        .tabs-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .tabs-row .tabs-header {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .btn-tabs-clear {
+            background: #1a1a1c;
+            border: 1px solid #2a2a2c;
+            color: #555;
+            border-radius: 8px;
+            padding: 7px 9px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-tabs-clear:hover {
+            border-color: #8a2a2a;
+            color: #e55;
+            background: #1f1414;
+        }
+
+        .tabs-header {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            background: #1a1a1c;
+            padding: 6px;
+            border-radius: 10px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tabs-header::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .tabs-header::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .tab-btn {
+            padding: 8px 14px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            color: #888;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: #bbb;
+        }
+
+        .tab-btn.active {
+            background: #2a2a2c;
+            color: #fff;
+        }
+
+        .tab-btn .tab-close {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            margin-left: 2px;
+            border-radius: 3px;
+            background: none;
+            border: none;
+            color: #777;
+            cursor: pointer;
+            padding: 0;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .tab-btn:hover .tab-close,
+        .tab-btn.active .tab-close {
+            display: flex;
+        }
+
+        .tab-btn .tab-close:hover {
+            background: #3a3a3c;
+            color: #e55;
+        }
+
+        .tab-btn .tab-status {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #555;
+        }
+
+        .tab-btn .tab-status.processing {
+            background: #5a9;
+            animation: pulse 1s infinite;
+        }
+
+        .tab-btn .tab-status.completed {
+            background: #5a5;
+        }
+
+        .tab-btn .tab-status.error {
+            background: #a55;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .result-card {
+            background: #141416;
+            border: 1px solid #2a2a2c;
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .result-filename {
+            font-size: 13px;
+            color: #888;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .result-filename svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 8px 12px;
+            background: #222224;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #ccc;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover {
+            background: #2a2a2c;
+        }
+
+        .btn-action svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .btn-action.editing {
+            background: #2a2510;
+            border-color: #3a3520;
+            color: #ca8;
+        }
+
+        .btn-action.save-btn {
+            display: none;
+            background: #1a2a1a;
+            border-color: #2a3a2a;
+            color: #8c8;
+        }
+
+        .btn-action.save-btn.visible {
+            display: flex;
+        }
+
+        .result-text {
+            background: #111113;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 14px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #bbb;
+        }
+
+        .result-text:focus {
+            outline: none;
+            border-color: #444;
+        }
+
+        .result-text.editing {
+            background: #151518;
+            border-color: #3a3520;
+        }
+
+        .result-text::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .result-text::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .log-card {
+            max-height: 300px;
+        }
+
+        .log-box {
+            background: #141416;
+            border-radius: 8px;
+            height: 220px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .log-box::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .log-box::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .log-item {
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .log-item svg {
+            width: 14px;
+            height: 14px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .log-item.info {
+            background: #1a2530;
+            color: #7ab;
+        }
+
+        .log-item.success {
+            background: #1a2a1a;
+            color: #7a7;
+        }
+
+        .log-item.error {
+            background: #2a1a1a;
+            color: #a77;
+        }
+
+        .log-item.warning {
+            background: #2a2510;
+            color: #a97;
+        }
+
+        .log-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #444;
+            font-size: 12px;
+        }
+
+        .log-empty svg {
+            width: 28px;
+            height: 28px;
+            margin-bottom: 8px;
+            opacity: 0.4;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #222224;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 12px 16px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            z-index: 1000;
+        }
+
+        .toast.visible {
+            display: flex;
+            animation: fadeUp 0.3s ease;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .toast svg {
+            width: 16px;
+            height: 16px;
+            color: #7a7;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn-info {
+            background: none;
+            border: none;
+            color: #555;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            transition: color 0.2s;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-info:hover {
+            color: #aaa;
+        }
+
+        .file-modal-overlay {
+            position: fixed;
+            inset: 0;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            background: rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.22s ease;
+        }
+
+        .file-modal-overlay.open {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .file-modal {
+            background: #1c1c1e;
+            border: 1px solid #2a2a2c;
+            border-radius: 16px;
+            padding: 24px;
+            width: 340px;
+            max-width: calc(100vw - 48px);
+            transform: translateY(14px) scale(0.96);
+            transition: transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
+        }
+
+        .file-modal-overlay.open .file-modal {
+            transform: translateY(0) scale(1);
+        }
+
+        .file-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .file-modal-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .file-modal-close {
+            background: #252528;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s, background 0.2s;
+        }
+
+        .file-modal-close:hover {
+            color: #fff;
+            background: #333;
+        }
+
+        .meta-file-icon {
+            width: 52px;
+            height: 52px;
+            background: #252528;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .meta-file-icon svg {
+            width: 26px;
+            height: 26px;
+            color: #666;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 10px 0;
+            border-bottom: 1px solid #222;
+            gap: 16px;
+        }
+
+        .meta-row:last-child {
+            border-bottom: none;
+        }
+
+        .meta-label {
+            font-size: 12px;
+            color: #555;
+            flex-shrink: 0;
+        }
+
+        .meta-value {
+            font-size: 12px;
+            color: #ccc;
+            text-align: right;
+            word-break: break-word;
+            max-width: 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <div class="header">
+            <div class="header-left">
+                <h1>Transcriptor</h1>
+                <p>Audio a texto con IA</p>
+            </div>
+            <div class="mode-toggle">
+                <button class="mode-btn active" id="modeSingle">Individual</button>
+                <button class="mode-btn" id="modeQueue">Cola</button>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <div class="left-panel">
+                <div class="card">
+                    <div class="card-label">Subir archivo<span id="labelMultiple" style="display:none">s</span></div>
+                    <div class="dropzone" id="dropzone">
+                        <div class="dropzone-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                        </div>
+                        <p class="dropzone-text">
+                            <strong>Arrastra aquí</strong>
+                            <span id="dropHint">o clic para seleccionar</span>
+                        </p>
+                    </div>
+                    <input type="file" id="fileInput" accept=".mp3,audio/mpeg">
+
+                    <div class="single-file" id="singleFile">
+                        <div class="single-file-icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+                            </svg>
+                        </div>
+                        <div class="single-file-info">
+                            <div class="single-file-name" id="singleFileName"></div>
+                            <div class="single-file-size" id="singleFileSize"></div>
+                        </div>
+                        <button class="btn-info" id="singleFileInfo" title="Ver detalles">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </button>
+                        <button class="single-file-remove" id="singleFileRemove">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="queue-section" id="queueSection">
+                        <div class="queue-header">
+                            <span class="queue-title">Cola de archivos</span>
+                            <span class="queue-count" id="queueCount">0</span>
+                        </div>
+                        <div class="queue-list" id="queueList"></div>
+                    </div>
+
+                    <button class="btn-start" id="btnStart" disabled>Iniciar</button>
+
+                    <div class="progress-mini" id="progressMini">
+                        <div class="progress-mini-header">
+                            <span id="progressLabel">Procesando...</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="progress-mini-track">
+                            <div class="progress-mini-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card log-card">
+                    <div class="card-label">Registro</div>
+                    <div class="log-box" id="logBox">
+                        <div class="log-empty" id="logEmpty">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <span>Sin actividad</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="tabs-container" id="tabsContainer">
+                    <div class="tabs-row">
+                        <div class="tabs-header" id="tabsHeader"></div>
+                        <button class="btn-tabs-clear" onclick="clearAll()" title="Borrar todo">
+                            <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="tabsContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="file-modal-overlay" id="fileModalOverlay" onclick="closeInfoModal()">
+        <div class="file-modal" onclick="event.stopPropagation()">
+            <div class="file-modal-header">
+                <span class="file-modal-title">Detalles del archivo</span>
+                <button class="file-modal-close" onclick="closeInfoModal()">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="fileModalBody"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        </svg>
+        <span id="toastText"></span>
+    </div>
+
+    <script>
+        const socket = io();
+
+        const modeSingle = document.getElementById('modeSingle');
+        const modeQueue = document.getElementById('modeQueue');
+        const labelMultiple = document.getElementById('labelMultiple');
+        const dropHint = document.getElementById('dropHint');
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const singleFile = document.getElementById('singleFile');
+        const singleFileName = document.getElementById('singleFileName');
+        const singleFileSize = document.getElementById('singleFileSize');
+        const singleFileRemove = document.getElementById('singleFileRemove');
+        const queueSection = document.getElementById('queueSection');
+        const queueList = document.getElementById('queueList');
+        const queueCount = document.getElementById('queueCount');
+        const btnStart = document.getElementById('btnStart');
+        const progressMini = document.getElementById('progressMini');
+        const progressLabel = document.getElementById('progressLabel');
+        const progressPercent = document.getElementById('progressPercent');
+        const progressFill = document.getElementById('progressFill');
+        const logBox = document.getElementById('logBox');
+        const logEmpty = document.getElementById('logEmpty');
+        const tabsContainer = document.getElementById('tabsContainer');
+        const tabsHeader = document.getElementById('tabsHeader');
+        const tabsContent = document.getElementById('tabsContent');
+        const toast = document.getElementById('toast');
+        const toastText = document.getElementById('toastText');
+
+        let isQueueMode = false;
+        let singleFileData = null;
+        let queue = [];
+        let currentIndex = -1;
+        let isProcessing = false;
+        let transcriptions = {};
+        let editingStates = {};
+        let fileMetadata = {};
+        let saveStateTimer = null;
+        let wasRestoredFromSave = false;
+        let singleFileRestored = false;
+
+        // --- IndexedDB helpers (persist File objects across page refresh) ---
+        const _idbReady = new Promise((resolve, reject) => {
+            const req = indexedDB.open('transcriptorFiles', 1);
+            req.onupgradeneeded = e => e.target.result.createObjectStore('files');
+            req.onsuccess = e => resolve(e.target.result);
+            req.onerror = () => reject(req.error);
+        });
+        async function idbPut(key, value) {
+            try {
+                const db = await _idbReady;
+                await new Promise((res, rej) => {
+                    const tx = db.transaction('files', 'readwrite');
+                    tx.objectStore('files').put(value, key);
+                    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+                });
+            } catch (e) {}
+        }
+        async function idbGet(key) {
+            try {
+                const db = await _idbReady;
+                return await new Promise((res, rej) => {
+                    const tx = db.transaction('files', 'readonly');
+                    const req = tx.objectStore('files').get(key);
+                    req.onsuccess = () => res(req.result || null);
+                    req.onerror = () => rej(req.error);
+                });
+            } catch (e) { return null; }
+        }
+        async function idbDelete(key) {
+            try {
+                const db = await _idbReady;
+                await new Promise((res, rej) => {
+                    const tx = db.transaction('files', 'readwrite');
+                    tx.objectStore('files').delete(key);
+                    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+                });
+            } catch (e) {}
+        }
+
+        function formatBytes(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+
+        function generateId() {
+            return 'f' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function showToast(msg) {
+            toastText.textContent = msg;
+            toast.classList.add('visible');
+            setTimeout(() => toast.classList.remove('visible'), 2500);
+        }
+
+        function fmtDuration(secs) {
+            if (!secs || isNaN(secs)) return '—';
+            const h = Math.floor(secs / 3600);
+            const m = Math.floor((secs % 3600) / 60);
+            const s = Math.floor(secs % 60);
+            if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        }
+
+        function getAudioDuration(file) {
+            return new Promise(resolve => {
+                const audio = new Audio();
+                const url = URL.createObjectURL(file);
+                audio.onloadedmetadata = () => { URL.revokeObjectURL(url); resolve(audio.duration); };
+                audio.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+                audio.src = url;
+            });
+        }
+
+        function openInfoModal(metaId) {
+            const meta = fileMetadata[metaId];
+            if (!meta) return;
+            document.getElementById('fileModalBody').innerHTML = `
+                <div class="meta-file-icon">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                </div>
+                <div class="meta-row"><span class="meta-label">Nombre</span><span class="meta-value">${meta.name}</span></div>
+                <div class="meta-row"><span class="meta-label">Tamaño</span><span class="meta-value">${formatBytes(meta.size)}</span></div>
+                <div class="meta-row"><span class="meta-label">Duración</span><span class="meta-value">${fmtDuration(meta.duration)}</span></div>
+                <div class="meta-row"><span class="meta-label">Tipo</span><span class="meta-value">${meta.type || 'audio/mpeg'}</span></div>
+                <div class="meta-row"><span class="meta-label">Modificado</span><span class="meta-value">${meta.lastModified ? new Date(meta.lastModified).toLocaleString('es-PE') : '—'}</span></div>
+            `;
+            document.getElementById('fileModalOverlay').classList.add('open');
+        }
+
+        function closeInfoModal() {
+            document.getElementById('fileModalOverlay').classList.remove('open');
+        }
+
+        function saveState() {
+            const tabData = [...tabsHeader.children].map(btn => ({
+                id: btn.id.replace('tab-', ''),
+                name: btn.dataset.name || '',
+                dotStatus: (btn.querySelector('.tab-status')?.className || '').replace('tab-status', '').trim(),
+                tabMode: btn.dataset.tabMode || 'single'
+            }));
+            const state = {
+                mode: isQueueMode ? 'queue' : 'single',
+                transcriptions: { ...transcriptions },
+                tabs: tabData,
+                queue: queue.map(({ id, name, size, status }) => ({ id, name, size, status })),
+                fileMetadata: { ...fileMetadata }
+            };
+            try { localStorage.setItem('transcriptorState', JSON.stringify(state)); } catch (e) { }
+        }
+
+        function debouncedSaveState() {
+            clearTimeout(saveStateTimer);
+            saveStateTimer = setTimeout(saveState, 2000);
+        }
+
+        async function restoreState() {
+            try {
+                const raw = localStorage.getItem('transcriptorState');
+                if (!raw) return;
+                const state = JSON.parse(raw);
+
+                if (state.fileMetadata) Object.assign(fileMetadata, state.fileMetadata);
+                if (state.transcriptions) Object.assign(transcriptions, state.transcriptions);
+
+                if (state.mode === 'queue') setMode(true, true); // skipSave: avoid overwriting state before tabs/queue are restored
+
+                if (state.tabs && state.tabs.length > 0) {
+                    state.tabs.forEach(tab => {
+                        const dotStatus = tab.dotStatus === 'processing' ? 'error' : tab.dotStatus;
+                        const tabMode = tab.tabMode || (state.mode === 'queue' ? 'queue' : 'single');
+                        createTab(tab.id, tab.name, tabMode);
+                        updateTabStatus(tab.id, dotStatus);
+                        const textEl = document.getElementById(`text-${tab.id}`);
+                        if (textEl && transcriptions[tab.id]) {
+                            textEl.textContent = transcriptions[tab.id];
+                        }
+                    });
+                }
+
+                if (state.queue && state.queue.length > 0) {
+                    const pendingItems = state.queue.filter(item => item.status === 'pending');
+                    const otherItems = state.queue.filter(item => item.status !== 'pending');
+
+                    otherItems.forEach(item => {
+                        queue.push({ id: item.id, name: item.name, size: item.size, status: item.status === 'processing' ? 'error' : item.status });
+                    });
+
+                    if (pendingItems.length > 0) {
+                        const recoveries = await Promise.all(pendingItems.map(async item => ({
+                            item, file: await idbGet(item.id)
+                        })));
+                        recoveries.forEach(({ item, file }) => {
+                            if (file) {
+                                queue.push({ id: item.id, file, name: item.name, size: item.size, status: 'pending' });
+                            } else {
+                                queue.push({ id: item.id, name: item.name, size: item.size, status: 'error' });
+                                updateTabStatus(item.id, 'error');
+                            }
+                        });
+                    }
+
+                    wasRestoredFromSave = true;
+                    renderQueue();
+                    updateStartButton();
+                }
+
+                if (!isQueueMode) {
+                    const savedSingle = await idbGet('single');
+                    if (savedSingle) {
+                        singleFileData = savedSingle;
+                        if (!fileMetadata['single']) fileMetadata['single'] = { name: savedSingle.name, size: savedSingle.size, type: savedSingle.type || 'audio/mpeg', lastModified: savedSingle.lastModified, duration: null };
+                        singleFileName.textContent = savedSingle.name;
+                        singleFileSize.textContent = formatBytes(savedSingle.size);
+                        singleFile.classList.add('visible');
+                        singleFileRestored = true;
+                        updateStartButton();
+                    }
+                }
+            } catch (e) { }
+        }
+
+        const LOG_ICONS = {
+            info: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            success: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            error: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            warning: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>'
+        };
+
+        function addLog(type, msg) {
+            logEmpty.style.display = 'none';
+            const item = document.createElement('div');
+            item.className = `log-item ${type}`;
+            item.innerHTML = `${LOG_ICONS[type]}<span>${msg}</span>`;
+            logBox.appendChild(item);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function setMode(queueMode, skipSave = false) {
+            isQueueMode = queueMode;
+            modeSingle.classList.toggle('active', !queueMode);
+            modeQueue.classList.toggle('active', queueMode);
+            labelMultiple.style.display = queueMode ? 'inline' : 'none';
+            dropHint.textContent = queueMode ? 'o clic para seleccionar varios' : 'o clic para seleccionar';
+            fileInput.multiple = queueMode;
+
+            if (queueMode) {
+                singleFile.classList.remove('visible');
+                singleFileData = null;
+                queueSection.classList.add('visible');
+                renderQueue();
+            } else {
+                queueSection.classList.remove('visible');
+            }
+
+            const targetMode = queueMode ? 'queue' : 'single';
+            let hasVisibleActive = false;
+            tabsHeader.querySelectorAll('.tab-btn').forEach(btn => {
+                const visible = btn.dataset.tabMode === targetMode;
+                btn.style.display = visible ? '' : 'none';
+                if (!visible) btn.classList.remove('active');
+                else if (btn.classList.contains('active')) hasVisibleActive = true;
+            });
+            tabsContent.querySelectorAll('.tab-content').forEach(c => {
+                if (c.dataset.tabMode !== targetMode) c.classList.remove('active');
+            });
+            if (!hasVisibleActive) {
+                const first = tabsHeader.querySelector(`.tab-btn[data-tab-mode="${targetMode}"]`);
+                if (first) switchTab(first.id.replace('tab-', ''));
+            }
+
+            updateTabsVisibility();
+            updateStartButton();
+            if (!skipSave) saveState();
+        }
+
+        function updateTabsVisibility() {
+            const targetMode = isQueueMode ? 'queue' : 'single';
+            const hasVisible = [...tabsHeader.children].some(b => b.dataset.tabMode === targetMode);
+            tabsContainer.classList.toggle('visible', hasVisible);
+        }
+
+        function updateStartButton() {
+            if (isQueueMode) {
+                const pending = queue.filter(f => f.status === 'pending').length;
+                btnStart.disabled = pending === 0 || isProcessing;
+                if (isProcessing) {
+                    btnStart.textContent = 'Procesando...';
+                } else {
+                    btnStart.textContent = wasRestoredFromSave && pending > 0 ? `Reanudar (${pending})` : `Iniciar (${pending})`;
+                }
+            } else {
+                btnStart.disabled = !singleFileData || isProcessing;
+                if (isProcessing) {
+                    btnStart.textContent = 'Procesando...';
+                } else {
+                    btnStart.textContent = singleFileRestored ? 'Reanudar' : 'Iniciar';
+                }
+            }
+        }
+
+        function addToQueue(file) {
+            if (file.size > 300 * 1024 * 1024) {
+                addLog('error', `${file.name}: excede 300MB`);
+                return;
+            }
+            if (!file.type.includes('audio') && !file.name.endsWith('.mp3')) {
+                addLog('error', `${file.name}: no es MP3`);
+                return;
+            }
+            const id = generateId();
+            fileMetadata[id] = { name: file.name, size: file.size, type: file.type || 'audio/mpeg', lastModified: file.lastModified, duration: null };
+            queue.push({ id, file, name: file.name, size: file.size, status: 'pending' });
+            transcriptions[id] = '';
+            idbPut(id, file);
+            renderQueue();
+            updateStartButton();
+            createTab(id, file.name);
+            getAudioDuration(file).then(dur => { fileMetadata[id].duration = dur; });
+            saveState();
+        }
+
+        function removeFromQueue(id) {
+            queue = queue.filter(f => f.id !== id);
+            delete transcriptions[id];
+            delete fileMetadata[id];
+            idbDelete(id);
+            renderQueue();
+            updateStartButton();
+            removeTab(id);
+            saveState();
+        }
+
+        function renderQueue() {
+            queueList.innerHTML = '';
+            queueCount.textContent = queue.length;
+            queue.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `queue-item ${item.status}`;
+                div.innerHTML = `
+                    <div class="queue-icon ${item.status}">
+                        ${item.status === 'processing' ? '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>' :
+                        item.status === 'completed' ? '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' :
+                            item.status === 'error' ? '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>' :
+                                '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>'}
+                    </div>
+                    <div class="queue-info">
+                        <div class="queue-name">${item.name}</div>
+                        <div class="queue-status">${item.status === 'processing' ? 'Procesando...' : item.status === 'completed' ? 'Completado' : item.status === 'error' ? 'Error' : formatBytes(item.size)}</div>
+                    </div>
+                    <button class="btn-info" onclick="openInfoModal('${item.id}')" title="Ver detalles"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></button>
+                    ${item.status === 'pending' ? `<button class="queue-remove" onclick="removeFromQueue('${item.id}')"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>` : ''}
+                `;
+                queueList.appendChild(div);
+            });
+        }
+
+        function createTab(id, name, tabMode = null) {
+            const mode = tabMode !== null ? tabMode : (isQueueMode ? 'queue' : 'single');
+            const currentMode = isQueueMode ? 'queue' : 'single';
+
+            const btn = document.createElement('button');
+            btn.className = 'tab-btn';
+            btn.id = `tab-${id}`;
+            btn.dataset.name = name;
+            btn.dataset.tabMode = mode;
+            if (mode !== currentMode) btn.style.display = 'none';
+            btn.innerHTML = `<span class="tab-status"></span><span>${name.length > 20 ? name.substr(0, 18) + '...' : name}</span><button class="tab-close" onclick="event.stopPropagation();closeTab('${id}')" title="Cerrar"><svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>`;
+            btn.onclick = () => switchTab(id);
+            tabsHeader.appendChild(btn);
+
+            const content = document.createElement('div');
+            content.className = 'tab-content';
+            content.id = `content-${id}`;
+            content.dataset.tabMode = mode;
+            content.innerHTML = `
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-filename">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
+                            ${name}
+                        </div>
+                        <div class="result-actions">
+                            <button class="btn-action" onclick="toggleEdit('${id}')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                Editar
+                            </button>
+                            <button class="btn-action save-btn" onclick="saveEdit('${id}')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                Guardar
+                            </button>
+                            <button class="btn-action" onclick="copyText('${id}')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                Copiar
+                            </button>
+                            <button class="btn-action" onclick="downloadText('${id}', '${name}')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                Descargar
+                            </button>
+                            <button class="btn-action" onclick="exportPDF('${id}', '${name}')">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                PDF
+                            </button>
+                        </div>
+                    </div>
+                    <div class="result-text" id="text-${id}" contenteditable="false"></div>
+                </div>
+            `;
+            tabsContent.appendChild(content);
+
+            if (mode === currentMode) {
+                const activeInMode = [...tabsHeader.children].find(b => b.dataset.tabMode === mode && b.classList.contains('active'));
+                if (!activeInMode) switchTab(id);
+            }
+
+            updateTabsVisibility();
+        }
+
+        function removeTab(id) {
+            document.getElementById(`tab-${id}`)?.remove();
+            document.getElementById(`content-${id}`)?.remove();
+            updateTabsVisibility();
+            const currentMode = isQueueMode ? 'queue' : 'single';
+            const visibleTabs = [...tabsHeader.children].filter(b => b.dataset.tabMode === currentMode);
+            if (visibleTabs.length > 0 && !document.querySelector('.tab-btn.active')) {
+                switchTab(visibleTabs[0].id.replace('tab-', ''));
+            }
+        }
+
+        function switchTab(id) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`tab-${id}`)?.classList.add('active');
+            document.getElementById(`content-${id}`)?.classList.add('active');
+        }
+
+        function updateTabStatus(id, status) {
+            const tab = document.getElementById(`tab-${id}`);
+            if (tab) {
+                const dot = tab.querySelector('.tab-status');
+                dot.className = `tab-status ${status}`;
+            }
+        }
+
+        function toggleEdit(id) {
+            const textEl = document.getElementById(`text-${id}`);
+            const contentEl = document.getElementById(`content-${id}`);
+            const isEditing = editingStates[id];
+
+            if (isEditing) {
+                editingStates[id] = false;
+                textEl.contentEditable = false;
+                textEl.classList.remove('editing');
+                contentEl.querySelector('.save-btn').classList.remove('visible');
+                contentEl.querySelector('.btn-action').classList.remove('editing');
+            } else {
+                editingStates[id] = true;
+                textEl.contentEditable = true;
+                textEl.classList.add('editing');
+                textEl.focus();
+                contentEl.querySelector('.save-btn').classList.add('visible');
+                contentEl.querySelector('.btn-action').classList.add('editing');
+            }
+        }
+
+        function saveEdit(id) {
+            editingStates[id] = false;
+            const textEl = document.getElementById(`text-${id}`);
+            const contentEl = document.getElementById(`content-${id}`);
+            textEl.contentEditable = false;
+            textEl.classList.remove('editing');
+            contentEl.querySelector('.save-btn').classList.remove('visible');
+            contentEl.querySelector('.btn-action').classList.remove('editing');
+            transcriptions[id] = textEl.innerText;
+            showToast('Guardado');
+            saveState();
+        }
+
+        function copyText(id) {
+            const text = document.getElementById(`text-${id}`)?.innerText || transcriptions[id];
+            navigator.clipboard.writeText(text);
+            showToast('Copiado');
+        }
+
+        function downloadText(id, name) {
+            const text = document.getElementById(`text-${id}`)?.innerText || transcriptions[id];
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = name.replace('.mp3', '') + '_transcripcion.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('Descargando');
+        }
+
+        function exportPDF(id, name) {
+            const text = document.getElementById(`text-${id}`)?.innerText || transcriptions[id] || '';
+            if (!text.trim()) { showToast('Sin texto para exportar'); return; }
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+
+            const marginLeft = 20;
+            const marginRight = 20;
+            const marginTop = 20;
+            const lineHeight = 6;
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            const maxWidth = pageWidth - marginLeft - marginRight;
+            let y = marginTop;
+
+            // Título
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(14);
+            doc.setTextColor(30, 30, 30);
+            const title = name.replace('.mp3', '') + ' — Transcripción';
+            doc.text(title, marginLeft, y);
+            y += 8;
+
+            // Línea separadora
+            doc.setDrawColor(180, 180, 180);
+            doc.line(marginLeft, y, pageWidth - marginRight, y);
+            y += 7;
+
+            // Cuerpo del texto
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.setTextColor(50, 50, 50);
+
+            const lines = text.split('\n');
+            for (const rawLine of lines) {
+                const wrapped = doc.splitTextToSize(rawLine === '' ? ' ' : rawLine, maxWidth);
+                for (const wline of wrapped) {
+                    if (y + lineHeight > pageHeight - 15) {
+                        doc.addPage();
+                        y = marginTop;
+                    }
+                    doc.text(wline, marginLeft, y);
+                    y += lineHeight;
+                }
+            }
+
+            doc.save(name.replace('.mp3', '') + '_transcripcion.pdf');
+            showToast('PDF descargado');
+        }
+
+        async function uploadAndProcess(fileData, fileId) {
+            const formData = new FormData();
+            formData.append('archivo', fileData);
+
+            try {
+                const res = await fetch('/upload', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.error) {
+                    addLog('error', data.error);
+                    return false;
+                }
+                socket.emit('transcribir', { filename: data.filename, fileId });
+                return true;
+            } catch (err) {
+                addLog('error', 'Error al subir');
+                return false;
+            }
+        }
+
+        async function processQueue() {
+            isProcessing = true;
+            wasRestoredFromSave = false;
+            updateStartButton();
+            progressMini.classList.add('visible');
+
+            for (let i = 0; i < queue.length; i++) {
+                const item = queue[i];
+                if (item.status !== 'pending') continue;
+
+                currentIndex = i;
+                item.status = 'processing';
+                idbDelete(item.id);
+                renderQueue();
+                updateTabStatus(item.id, 'processing');
+                switchTab(item.id);
+
+                progressLabel.textContent = `${item.name}`;
+                progressFill.style.width = '0%';
+                progressPercent.textContent = '0%';
+
+                addLog('info', `Subiendo: ${item.name}`);
+
+                const success = await uploadAndProcess(item.file, item.id);
+                if (!success) {
+                    item.status = 'error';
+                    updateTabStatus(item.id, 'error');
+                }
+
+                await new Promise(resolve => {
+                    const handler = (data) => {
+                        if (data.fileId === item.id) {
+                            socket.off('archivo_completado', handler);
+                            socket.off('archivo_error', errorHandler);
+                            resolve();
+                        }
+                    };
+                    const errorHandler = (data) => {
+                        if (data.fileId === item.id) {
+                            socket.off('archivo_completado', handler);
+                            socket.off('archivo_error', errorHandler);
+                            resolve();
+                        }
+                    };
+                    socket.on('archivo_completado', handler);
+                    socket.on('archivo_error', errorHandler);
+                });
+
+                renderQueue();
+            }
+
+            isProcessing = false;
+            currentIndex = -1;
+            updateStartButton();
+            progressMini.classList.remove('visible');
+            showToast('Cola completada');
+        }
+
+        async function processSingle() {
+            if (!singleFileData) return;
+
+            isProcessing = true;
+            singleFileRestored = false;
+            idbDelete('single');
+            updateStartButton();
+            progressMini.classList.add('visible');
+            progressLabel.textContent = singleFileData.name;
+            progressFill.style.width = '0%';
+            progressPercent.textContent = '0%';
+
+            const id = generateId();
+            transcriptions[id] = '';
+            createTab(id, singleFileData.name);
+            switchTab(id);
+
+            addLog('info', `Subiendo: ${singleFileData.name}`);
+
+            const success = await uploadAndProcess(singleFileData, id);
+
+            if (success) {
+                await new Promise(resolve => {
+                    const handler = (data) => {
+                        if (data.fileId === id) {
+                            socket.off('archivo_completado', handler);
+                            socket.off('archivo_error', errorHandler);
+                            resolve();
+                        }
+                    };
+                    const errorHandler = (data) => {
+                        if (data.fileId === id) {
+                            socket.off('archivo_completado', handler);
+                            socket.off('archivo_error', errorHandler);
+                            resolve();
+                        }
+                    };
+                    socket.on('archivo_completado', handler);
+                    socket.on('archivo_error', errorHandler);
+                });
+            }
+
+            isProcessing = false;
+            singleFile.classList.remove('visible');
+            singleFileData = null;
+            updateStartButton();
+            progressMini.classList.remove('visible');
+        }
+
+        function closeTab(id) {
+            const queueItem = queue.find(f => f.id === id);
+            if (queueItem) {
+                if (queueItem.status === 'processing') { showToast('No se puede borrar mientras procesa'); return; }
+                queue = queue.filter(f => f.id !== id);
+                idbDelete(id);
+                renderQueue();
+                updateStartButton();
+            }
+            delete transcriptions[id];
+            delete fileMetadata[id];
+            delete editingStates[id];
+            document.getElementById(`tab-${id}`)?.remove();
+            document.getElementById(`content-${id}`)?.remove();
+            updateTabsVisibility();
+            const currentMode = isQueueMode ? 'queue' : 'single';
+            const visibleTabs = [...tabsHeader.children].filter(b => b.dataset.tabMode === currentMode);
+            if (visibleTabs.length > 0 && !document.querySelector('.tab-btn.active')) {
+                switchTab(visibleTabs[0].id.replace('tab-', ''));
+            }
+            saveState();
+        }
+
+        async function clearAll() {
+            if (isProcessing) { showToast('Espera a que termine el procesamiento'); return; }
+            if (!confirm('¿Borrar todas las transcripciones y archivos guardados?')) return;
+
+            queue = [];
+            transcriptions = {};
+            fileMetadata = {};
+            editingStates = {};
+            wasRestoredFromSave = false;
+            singleFileData = null;
+            singleFileRestored = false;
+
+            singleFile.classList.remove('visible');
+            tabsHeader.innerHTML = '';
+            tabsContent.innerHTML = '';
+            tabsContainer.classList.remove('visible');
+
+            renderQueue();
+            updateStartButton();
+            localStorage.removeItem('transcriptorState');
+
+            try {
+                const db = await _idbReady;
+                await new Promise((res, rej) => {
+                    const tx = db.transaction('files', 'readwrite');
+                    tx.objectStore('files').clear();
+                    tx.oncomplete = res;
+                    tx.onerror = () => rej(tx.error);
+                });
+            } catch (e) {}
+
+            showToast('Todo borrado');
+        }
+
+        modeSingle.onclick = () => setMode(false);
+        modeQueue.onclick = () => setMode(true);
+
+        dropzone.onclick = () => fileInput.click();
+        dropzone.ondragover = e => { e.preventDefault(); dropzone.classList.add('active'); };
+        dropzone.ondragleave = () => dropzone.classList.remove('active');
+        dropzone.ondrop = e => {
+            e.preventDefault();
+            dropzone.classList.remove('active');
+            const files = Array.from(e.dataTransfer.files);
+            if (isQueueMode) {
+                files.forEach(f => addToQueue(f));
+            } else if (files[0]) {
+                handleSingleFile(files[0]);
+            }
+        };
+
+        fileInput.onchange = () => {
+            const files = Array.from(fileInput.files);
+            if (isQueueMode) {
+                files.forEach(f => addToQueue(f));
+            } else if (files[0]) {
+                handleSingleFile(files[0]);
+            }
+            fileInput.value = '';
+        };
+
+        function handleSingleFile(file) {
+            if (file.size > 300 * 1024 * 1024) {
+                addLog('error', 'Archivo excede 300MB');
+                return;
+            }
+            if (!file.type.includes('audio') && !file.name.endsWith('.mp3')) {
+                addLog('error', 'Solo archivos MP3');
+                return;
+            }
+            singleFileData = file;
+            singleFileRestored = false;
+            fileMetadata['single'] = { name: file.name, size: file.size, type: file.type || 'audio/mpeg', lastModified: file.lastModified, duration: null };
+            singleFileName.textContent = file.name;
+            singleFileSize.textContent = formatBytes(file.size);
+            singleFile.classList.add('visible');
+            idbPut('single', file);
+            updateStartButton();
+            getAudioDuration(file).then(dur => { fileMetadata['single'].duration = dur; });
+        }
+
+        singleFileRemove.onclick = () => {
+            singleFileData = null;
+            singleFileRestored = false;
+            delete fileMetadata['single'];
+            singleFile.classList.remove('visible');
+            idbDelete('single');
+            updateStartButton();
+            saveState();
+        };
+
+        btnStart.onclick = () => {
+            if (isQueueMode) {
+                processQueue();
+            } else {
+                processSingle();
+            }
+        };
+
+        document.getElementById('singleFileInfo').onclick = () => openInfoModal('single');
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInfoModal(); });
+
+        socket.on('dev_reload', () => setTimeout(() => window.location.reload(), 150));
+
+        socket.on('log', data => addLog(data.tipo, data.mensaje));
+
+        socket.on('archivo_progreso', data => {
+            progressFill.style.width = data.porcentaje + '%';
+            progressPercent.textContent = data.porcentaje + '%';
+        });
+
+        socket.on('transcripcion_parcial', data => {
+            const textEl = document.getElementById(`text-${data.fileId}`);
+            if (textEl) {
+                transcriptions[data.fileId] += data.texto;
+                textEl.textContent = transcriptions[data.fileId];
+                textEl.scrollTop = textEl.scrollHeight;
+                debouncedSaveState();
+            }
+        });
+
+        socket.on('archivo_completado', data => {
+            const item = queue.find(f => f.id === data.fileId);
+            if (item) {
+                item.status = 'completed';
+                renderQueue();
+            }
+            updateTabStatus(data.fileId, 'completed');
+            showToast('Transcripción completada');
+            saveState();
+        });
+
+        socket.on('archivo_error', data => {
+            const item = queue.find(f => f.id === data.fileId);
+            if (item) {
+                item.status = 'error';
+                renderQueue();
+            }
+            updateTabStatus(data.fileId, 'error');
+            saveState();
+        });
+        restoreState(); // async, no need to await — UI updates internally
+    </script>
+</body>
+
+</html>
