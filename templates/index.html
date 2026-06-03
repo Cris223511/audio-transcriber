@@ -1083,7 +1083,7 @@
                             <span id="dropHint">o clic para seleccionar</span>
                         </p>
                     </div>
-                    <input type="file" id="fileInput" accept=".mp3,audio/mpeg">
+                    <input type="file" id="fileInput" accept=".mp3,.mp4,audio/mpeg,video/mp4">
 
                     <div class="single-file" id="singleFile">
                         <div class="single-file-icon">
@@ -1484,13 +1484,18 @@
             }
         }
 
+        function isAccepted(file) {
+            return file.type.includes('audio') || file.type.includes('video/mp4') ||
+                   file.name.endsWith('.mp3') || file.name.endsWith('.mp4');
+        }
+
         function addToQueue(file) {
-            if (file.size > 300 * 1024 * 1024) {
-                addLog('error', `${file.name}: excede 300MB`);
+            if (file.size > 2 * 1024 * 1024 * 1024) {
+                addLog('error', `${file.name}: excede 2GB`);
                 return;
             }
-            if (!file.type.includes('audio') && !file.name.endsWith('.mp3')) {
-                addLog('error', `${file.name}: no es MP3`);
+            if (!isAccepted(file)) {
+                addLog('error', `${file.name}: solo MP3 o MP4`);
                 return;
             }
             const id = generateId();
@@ -1673,7 +1678,7 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = name.replace('.mp3', '') + '_transcripcion.txt';
+            a.download = name.replace(/\.(mp3|mp4)$/i, '') + '_transcripcion.txt';
             a.click();
             URL.revokeObjectURL(url);
             showToast('Descargando');
@@ -1699,7 +1704,7 @@
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(14);
             doc.setTextColor(30, 30, 30);
-            const title = name.replace('.mp3', '') + ' — Transcripción';
+            const title = name.replace(/\.(mp3|mp4)$/i, '') + ' — Transcripción';
             doc.text(title, marginLeft, y);
             y += 8;
 
@@ -1726,7 +1731,7 @@
                 }
             }
 
-            doc.save(name.replace('.mp3', '') + '_transcripcion.pdf');
+            doc.save(name.replace(/\.(mp3|mp4)$/i, '') + '_transcripcion.pdf');
             showToast('PDF descargado');
         }
 
@@ -1941,12 +1946,12 @@
         };
 
         function handleSingleFile(file) {
-            if (file.size > 300 * 1024 * 1024) {
-                addLog('error', 'Archivo excede 300MB');
+            if (file.size > 2 * 1024 * 1024 * 1024) {
+                addLog('error', 'Archivo excede 2GB');
                 return;
             }
-            if (!file.type.includes('audio') && !file.name.endsWith('.mp3')) {
-                addLog('error', 'Solo archivos MP3');
+            if (!isAccepted(file)) {
+                addLog('error', 'Solo archivos MP3 o MP4');
                 return;
             }
             singleFileData = file;
