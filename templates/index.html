@@ -948,10 +948,11 @@
         }
 
         .file-modal {
+            --modal-pad: 24px;
             background: #1c1c1e;
             border: 1px solid #2a2a2c;
             border-radius: 16px;
-            padding: 24px;
+            padding: var(--modal-pad);
             width: 340px;
             max-width: calc(100vw - 32px);
             max-height: calc(100vh - 32px);
@@ -1206,6 +1207,15 @@
         /* ---------- Modal de formato ---------- */
         .file-modal.fmt-modal {
             width: 680px;
+        }
+
+        /* Si el modal de formato necesita scroll, "Aceptar" queda siempre a la vista */
+        .fmt-modal .file-modal-actions {
+            position: sticky;
+            bottom: calc(-1 * var(--modal-pad));
+            margin: 18px calc(-1 * var(--modal-pad)) calc(-1 * var(--modal-pad));
+            padding: 12px var(--modal-pad) var(--modal-pad);
+            background: #1c1c1e;
         }
 
         .fmt-options {
@@ -1575,7 +1585,7 @@
             }
 
             .file-modal {
-                padding: 18px;
+                --modal-pad: 18px;
                 border-radius: 14px;
             }
 
@@ -1631,7 +1641,7 @@
             }
 
             .file-modal {
-                padding: 16px;
+                --modal-pad: 16px;
             }
 
             .segmented button {
@@ -2614,7 +2624,7 @@
             save: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
             copy: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>',
             download: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>',
-            downloadAll: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>',
+            downloadAll: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414a1 1 0 01.707-.293H20"/></svg>',
             close: '<svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>'
         };
 
@@ -3164,7 +3174,6 @@
         }
 
         function applyFormat() {
-            const formatChanged = fmtDraft.format !== outputFormat;
             outputFormat = fmtDraft.format === 'classic' ? 'classic' : 'speakers';
             numSpeakers = normalizeSpeakers(fmtDraft.speakers);
             closeModal(formatModalOverlay);
@@ -3180,12 +3189,12 @@
             });
 
             let msg = `Formato aplicado: ${FORMAT_NAMES[outputFormat]}`;
-            if (skipped && formatChanged) {
+            if (skipped) {
                 msg += skipped === 1
                     ? ' · 1 transcripción editada conserva su texto'
                     : ` · ${skipped} transcripciones editadas conservan su texto`;
             }
-            showToast(msg, skipped && formatChanged ? 4500 : 2500);
+            showToast(msg, skipped ? 4500 : 2500);
             saveState();
         }
 
