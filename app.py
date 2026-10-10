@@ -73,14 +73,11 @@ PIECE_MAX_SEC = 3.0
 VAD_MERGE_GAP = 4.0
 MAX_RECOVERIES = 5
 RECOVER_PAD = 0.3
-PROMPT_ECHO_MIN = 40
+PROMPT_ECHO_MIN = 30  # caracteres seguidos copiados del prompt para considerar que Whisper lo repitió
 
-INITIAL_PROMPT = (
-    "Audiencia judicial en el Perú, con intervención del juez, el fiscal y el abogado defensor. "
-    "Términos: flagrancia, flagrante delito, detención, prisión preventiva, investigación preparatoria, "
-    "Código Procesal Penal, Ministerio Público, Poder Judicial, PNP, Dirincri, RENIEC, "
-    "requerimiento acusatorio, diligencia, acta."
-)
+# Prompt neutro (sirve para cualquier audio: reuniones, videos, clases, música...). Solo marca el estilo:
+# español con puntuación y mayúsculas correctas. No aparece en la transcripción.
+INITIAL_PROMPT = "Esta es una transcripción en español, con puntuación y mayúsculas correctas."
 
 # Frases típicas de alucinación de Whisper (texto normalizado: minúsculas y sin tildes)
 HALLUCINATION_PHRASES = (
@@ -95,9 +92,9 @@ HALLUCINATION_PHRASES = (
 
 # Red de seguridad: los tokens de este texto nunca se suprimen (todos los signos del español)
 SPANISH_SAMPLE = (
-    "¿Señor juez, está usted de acuerdo? ¡Sí, señoría! El pingüino y el ñandú cruzaron. "
-    "Ángel, Érica, Íñigo, Óscar, Úrsula, Ñuño y GÜEMES declararon «sin presión» a 30 °C. "
-    "Es la 1º audiencia y la 2ª diligencia; el acta dice “conforme” y ‘visto’ — fin – listo… Pagó 50 €. "
+    "¿Está usted de acuerdo? ¡Sí, claro! El pingüino y el ñandú cruzaron. "
+    "Ángel, Érica, Íñigo, Óscar, Úrsula, Ñuño y GÜEMES dijeron «sin presión» a 30 °C. "
+    "Es la 1º reunión y la 2ª sesión; el informe dice “conforme” y ‘visto’ — fin – listo… Pagó 50 €. "
     "Signos: á é í ó ú ü ñ Á É Í Ó Ú Ü Ñ ¿ ¡ « » ° º ª “ ” ‘ ’ — – … €"
 )
 
