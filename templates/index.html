@@ -25,6 +25,10 @@
             overflow-x: hidden;
         }
 
+        body.modal-open {
+            overflow: hidden;
+        }
+
         .app {
             max-width: 1200px;
             margin: 0 auto;
@@ -92,133 +96,18 @@
             min-width: 0;
         }
 
-        @media (max-width: 1024px) {
-            .main-grid {
-                grid-template-columns: 280px 1fr;
-                gap: 16px;
-            }
+        .left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        @media (max-width: 900px) {
-            .app {
-                padding: 28px 18px;
-            }
-
-            .main-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .app {
-                padding: 20px 12px;
-            }
-
-            .header {
-                margin-bottom: 20px;
-                gap: 12px;
-            }
-
-            .header-left h1 {
-                font-size: 20px;
-            }
-
-            .header-left p {
-                font-size: 13px;
-            }
-
-            .mode-toggle {
-                width: 100%;
-            }
-
-            .mode-btn {
-                flex: 1;
-                padding: 8px 12px;
-            }
-
-            .card {
-                padding: 16px;
-                border-radius: 10px;
-            }
-
-            .dropzone {
-                padding: 24px 14px;
-            }
-
-            .result-card {
-                padding: 14px;
-            }
-
-            .result-header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .result-filename {
-                font-size: 12px;
-                word-break: break-all;
-            }
-
-            .result-actions {
-                width: 100%;
-                justify-content: flex-start;
-            }
-
-            .btn-action {
-                flex: 1 1 calc(50% - 3px);
-                justify-content: center;
-                padding: 9px 8px;
-            }
-
-            .result-text {
-                font-size: 16px;
-                padding: 12px;
-                min-height: 160px;
-                max-height: 320px;
-            }
-
-            .log-box {
-                height: 180px;
-            }
-
-            .tab-btn {
-                padding: 7px 10px;
-                font-size: 11px;
-            }
-
-            .toast {
-                left: 12px;
-                right: 12px;
-                bottom: 12px;
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .header {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .header-left h1 {
-                font-size: 18px;
-            }
-
-            .btn-action {
-                font-size: 11px;
-                padding: 8px 6px;
-            }
-
-            .btn-action svg {
-                width: 12px;
-                height: 12px;
-            }
-
-            .single-file-name,
-            .queue-name {
-                font-size: 11px;
-            }
+        button:focus-visible,
+        [role="tab"]:focus-visible,
+        [role="radio"]:focus-visible,
+        .dropzone:focus-visible {
+            outline: 2px solid #666;
+            outline-offset: 2px;
         }
 
         .card {
@@ -415,6 +304,7 @@
             cursor: pointer;
             padding: 4px;
             border-radius: 4px;
+            flex-shrink: 0;
         }
 
         .queue-remove:hover {
@@ -479,10 +369,59 @@
             cursor: pointer;
             padding: 6px;
             border-radius: 6px;
+            flex-shrink: 0;
         }
 
         .single-file-remove:hover {
             color: #e55;
+        }
+
+        .format-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+            margin-top: 16px;
+            padding: 10px 12px;
+            background: #222224;
+            border-radius: 10px;
+        }
+
+        .format-row-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .format-row-value {
+            flex: 1;
+            min-width: 0;
+            font-size: 12px;
+            color: #ccc;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .format-row-btn {
+            background: #2a2a2c;
+            border: 1px solid #333;
+            color: #ccc;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .format-row-btn:hover {
+            background: #333336;
+            color: #fff;
         }
 
         .btn-start {
@@ -497,6 +436,10 @@
             cursor: pointer;
             margin-top: 16px;
             transition: opacity 0.2s;
+        }
+
+        .format-row+.btn-start {
+            margin-top: 10px;
         }
 
         .btn-start:hover:not(:disabled) {
@@ -520,9 +463,17 @@
         .progress-mini-header {
             display: flex;
             justify-content: space-between;
+            gap: 10px;
             font-size: 11px;
             color: #666;
             margin-bottom: 6px;
+        }
+
+        .progress-mini-header #progressLabel {
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .progress-mini-track {
@@ -563,6 +514,7 @@
 
         .tabs-row .tabs-header {
             flex: 1;
+            min-width: 0;
             margin-bottom: 0;
         }
 
@@ -619,6 +571,9 @@
             align-items: center;
             gap: 6px;
             transition: all 0.2s;
+            user-select: none;
+            -webkit-user-select: none;
+            min-width: 0;
         }
 
         .tab-btn:hover {
@@ -628,6 +583,12 @@
         .tab-btn.active {
             background: #2a2a2c;
             color: #fff;
+        }
+
+        .tab-btn .tab-label {
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .tab-btn .tab-close {
@@ -662,6 +623,7 @@
             height: 6px;
             border-radius: 50%;
             background: #555;
+            flex-shrink: 0;
         }
 
         .tab-btn .tab-status.processing {
@@ -719,11 +681,21 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            min-width: 0;
+            flex: 1 1 180px;
         }
 
         .result-filename svg {
             width: 14px;
             height: 14px;
+            flex-shrink: 0;
+        }
+
+        .result-filename-text {
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .result-actions {
@@ -745,6 +717,7 @@
             align-items: center;
             gap: 5px;
             transition: background 0.2s;
+            white-space: nowrap;
         }
 
         .btn-action:hover {
@@ -754,6 +727,7 @@
         .btn-action svg {
             width: 14px;
             height: 14px;
+            flex-shrink: 0;
         }
 
         .btn-action.editing {
@@ -782,6 +756,7 @@
             max-height: 400px;
             overflow-y: auto;
             white-space: pre-wrap;
+            overflow-wrap: anywhere;
             font-size: 13px;
             line-height: 1.7;
             color: #bbb;
@@ -835,6 +810,11 @@
             display: flex;
             align-items: flex-start;
             gap: 8px;
+        }
+
+        .log-item span {
+            min-width: 0;
+            overflow-wrap: anywhere;
         }
 
         .log-item svg {
@@ -893,7 +873,7 @@
             align-items: center;
             gap: 8px;
             font-size: 13px;
-            z-index: 1000;
+            z-index: 3000;
         }
 
         .toast.visible {
@@ -917,6 +897,7 @@
             width: 16px;
             height: 16px;
             color: #7a7;
+            flex-shrink: 0;
         }
 
         input[type="file"] {
@@ -941,6 +922,7 @@
             color: #aaa;
         }
 
+        /* ---------- Modales (mismo overlay para todos) ---------- */
         .file-modal-overlay {
             position: fixed;
             inset: 0;
@@ -950,15 +932,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 16px;
             z-index: 2000;
             opacity: 0;
+            visibility: hidden;
             pointer-events: none;
-            transition: opacity 0.22s ease;
+            transition: opacity 0.22s ease, visibility 0s linear 0.22s;
         }
 
         .file-modal-overlay.open {
             opacity: 1;
+            visibility: visible;
             pointer-events: all;
+            transition: opacity 0.22s ease, visibility 0s;
         }
 
         .file-modal {
@@ -967,9 +953,26 @@
             border-radius: 16px;
             padding: 24px;
             width: 340px;
-            max-width: calc(100vw - 48px);
+            max-width: calc(100vw - 32px);
+            max-height: calc(100vh - 32px);
+            max-height: calc(100dvh - 32px);
+            overflow-y: auto;
+            overscroll-behavior: contain;
             transform: translateY(14px) scale(0.96);
             transition: transform 0.28s cubic-bezier(0.34, 1.4, 0.64, 1);
+        }
+
+        .file-modal:focus {
+            outline: none;
+        }
+
+        .file-modal::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .file-modal::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
         }
 
         .file-modal-overlay.open .file-modal {
@@ -980,13 +983,27 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 12px;
             margin-bottom: 20px;
+        }
+
+        .file-modal-heading {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
         }
 
         .file-modal-title {
             font-size: 14px;
             font-weight: 600;
             color: #fff;
+        }
+
+        .file-modal-subtitle {
+            font-size: 12px;
+            color: #777;
+            overflow-wrap: anywhere;
         }
 
         .file-modal-close {
@@ -1000,12 +1017,49 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
+            align-self: flex-start;
             transition: color 0.2s, background 0.2s;
         }
 
         .file-modal-close:hover {
             color: #fff;
             background: #333;
+        }
+
+        .file-modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 18px;
+        }
+
+        .btn-modal {
+            padding: 9px 16px;
+            min-height: 36px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #222224;
+            color: #ccc;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, opacity 0.2s;
+        }
+
+        .btn-modal:hover {
+            background: #2a2a2c;
+        }
+
+        .btn-modal.primary {
+            background: #ececec;
+            border-color: #ececec;
+            color: #111;
+        }
+
+        .btn-modal.primary:hover {
+            background: #ececec;
+            opacity: 0.9;
         }
 
         .meta-file-icon {
@@ -1049,7 +1103,558 @@
             color: #ccc;
             text-align: right;
             word-break: break-word;
+            overflow-wrap: anywhere;
             max-width: 200px;
+        }
+
+        /* ---------- Modal de descarga ---------- */
+        .file-modal.dl-modal {
+            width: 400px;
+        }
+
+        .dl-list {
+            list-style: none;
+            margin: 0 0 14px;
+            padding: 6px 10px;
+            max-height: 128px;
+            overflow-y: auto;
+            background: #141416;
+            border: 1px solid #222;
+            border-radius: 8px;
+        }
+
+        .dl-list li {
+            font-size: 12px;
+            color: #aaa;
+            padding: 3px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dl-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .dl-list::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .dl-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .dl-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            min-height: 60px;
+            padding: 12px 14px;
+            background: #222224;
+            border: 1px solid #2f2f32;
+            border-radius: 10px;
+            color: #ddd;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .dl-option:hover {
+            background: #2a2a2c;
+            border-color: #3a3a3c;
+        }
+
+        .dl-option-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            background: #2a2a2c;
+            color: #999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .dl-option-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .dl-option-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .dl-option-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .dl-option-desc {
+            font-size: 11px;
+            color: #777;
+        }
+
+        /* ---------- Modal de formato ---------- */
+        .file-modal.fmt-modal {
+            width: 680px;
+        }
+
+        .fmt-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .fmt-option {
+            position: relative;
+            padding: 14px;
+            background: #202022;
+            border: 1px solid #2f2f32;
+            border-radius: 12px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-user-select: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .fmt-option:hover {
+            border-color: #3c3c40;
+        }
+
+        .fmt-option[aria-checked="true"] {
+            background: #262629;
+            border-color: #8a8a8e;
+        }
+
+        .fmt-option-head {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 6px;
+            padding-right: 28px;
+        }
+
+        .fmt-option-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .fmt-badge {
+            font-size: 10px;
+            font-weight: 600;
+            color: #8c8;
+            background: #1a2a1a;
+            border: 1px solid #2a3a2a;
+            padding: 1px 7px;
+            border-radius: 10px;
+        }
+
+        .fmt-option-desc {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.45;
+        }
+
+        .fmt-check {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 1px solid #3a3a3c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: transparent;
+            transition: background 0.2s, border-color 0.2s, color 0.2s;
+        }
+
+        .fmt-check svg {
+            width: 12px;
+            height: 12px;
+        }
+
+        .fmt-option[aria-checked="true"] .fmt-check {
+            background: #ececec;
+            border-color: #ececec;
+            color: #111;
+        }
+
+        .fmt-section-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 8px;
+            margin: 18px 0 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .fmt-caption {
+            font-size: 11px;
+            font-weight: 500;
+            color: #555;
+            text-transform: none;
+            letter-spacing: 0;
+            text-align: right;
+        }
+
+        .segmented {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 3px;
+            padding: 3px;
+            background: #141416;
+            border: 1px solid #2a2a2c;
+            border-radius: 8px;
+        }
+
+        .segmented button {
+            min-width: 44px;
+            min-height: 32px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: #888;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .segmented button:hover {
+            color: #ccc;
+        }
+
+        .segmented button[aria-checked="true"] {
+            background: #2a2a2c;
+            color: #fff;
+        }
+
+        .fmt-hint {
+            margin-top: 8px;
+            font-size: 11px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .fmt-preview {
+            background: #111113;
+            border: 1px solid #222;
+            border-radius: 8px;
+            padding: 12px 14px;
+            max-height: 230px;
+            overflow-y: auto;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #bbb;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            transition: opacity 0.14s ease;
+        }
+
+        .fmt-preview.fading {
+            opacity: 0;
+        }
+
+        .fmt-preview::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .fmt-preview::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 2px;
+        }
+
+        .pv-num {
+            color: #555;
+        }
+
+        .pv-time {
+            color: #777;
+        }
+
+        .pv-voc {
+            color: #ccc;
+            font-weight: 600;
+        }
+
+        .pv-spk {
+            font-weight: 600;
+        }
+
+        .pv-spk-0 {
+            color: #7ab3d9;
+        }
+
+        .pv-spk-1 {
+            color: #d9b26a;
+        }
+
+        .pv-spk-2 {
+            color: #8cc98c;
+        }
+
+        .pv-spk-3 {
+            color: #c99ad6;
+        }
+
+        .pv-spk-4 {
+            color: #e0917e;
+        }
+
+        .pv-spk-5 {
+            color: #7cc7c4;
+        }
+
+        /* ---------- Responsive (al final para ganar a las reglas base) ---------- */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 280px 1fr;
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .app {
+                padding: 28px 18px;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .app {
+                padding: 20px 16px;
+            }
+
+            .header {
+                margin-bottom: 20px;
+                gap: 12px;
+            }
+
+            .header-left h1 {
+                font-size: 20px;
+            }
+
+            .header-left p {
+                font-size: 13px;
+            }
+
+            .mode-toggle {
+                width: 100%;
+            }
+
+            .mode-btn {
+                flex: 1;
+                padding: 8px 12px;
+                min-height: 36px;
+            }
+
+            .card {
+                padding: 16px;
+                border-radius: 10px;
+            }
+
+            .dropzone {
+                padding: 24px 14px;
+            }
+
+            .btn-start {
+                min-height: 44px;
+            }
+
+            .format-row-btn {
+                min-height: 36px;
+            }
+
+            .btn-info,
+            .queue-remove,
+            .single-file-remove {
+                min-width: 36px;
+                min-height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .result-card {
+                padding: 14px;
+            }
+
+            .result-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .result-filename {
+                font-size: 12px;
+                flex: 0 1 auto;
+            }
+
+            .result-filename-text {
+                white-space: normal;
+                overflow-wrap: anywhere;
+            }
+
+            .result-actions {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .btn-action {
+                flex: 1 1 calc(50% - 3px);
+                justify-content: center;
+                padding: 9px 8px;
+                min-height: 36px;
+            }
+
+            .result-text {
+                font-size: 14px;
+                padding: 12px;
+                min-height: 160px;
+                max-height: 360px;
+            }
+
+            .result-text.editing {
+                font-size: 16px;
+            }
+
+            .log-box {
+                height: 180px;
+            }
+
+            .tabs-header {
+                flex-wrap: nowrap;
+            }
+
+            .tab-btn {
+                padding: 7px 10px;
+                font-size: 11px;
+                min-height: 36px;
+                flex-shrink: 0;
+            }
+
+            .tab-btn .tab-label {
+                max-width: 140px;
+            }
+
+            .btn-tabs-clear {
+                min-width: 36px;
+                min-height: 36px;
+                justify-content: center;
+            }
+
+            .toast {
+                left: 16px;
+                right: 16px;
+                bottom: 16px;
+                width: auto;
+                max-width: none;
+                justify-content: center;
+            }
+
+            .file-modal {
+                padding: 18px;
+                border-radius: 14px;
+            }
+
+            .file-modal-close {
+                width: 36px;
+                height: 36px;
+            }
+
+            .fmt-options {
+                grid-template-columns: 1fr;
+            }
+
+            .file-modal-actions .btn-modal {
+                flex: 1;
+            }
+
+            .meta-value {
+                max-width: 65%;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-left h1 {
+                font-size: 18px;
+            }
+
+            .card {
+                padding: 14px;
+            }
+
+            .btn-action {
+                font-size: 11px;
+                padding: 8px 6px;
+            }
+
+            .btn-action svg {
+                width: 12px;
+                height: 12px;
+            }
+
+            .single-file-name,
+            .queue-name {
+                font-size: 11px;
+            }
+
+            .tab-btn .tab-label {
+                max-width: 110px;
+            }
+
+            .file-modal {
+                padding: 16px;
+            }
+
+            .segmented button {
+                min-width: 38px;
+                padding: 6px 8px;
+            }
+
+            .fmt-preview {
+                font-size: 11px;
+                padding: 10px;
+            }
+        }
+
+        /* En pantallas táctiles no hay hover: la "x" de la pestaña activa siempre visible y más grande */
+        @media (hover: none) {
+            .tab-btn .tab-close {
+                width: 22px;
+                height: 22px;
+            }
+
+            .tab-btn.active .tab-close {
+                display: flex;
+            }
         }
     </style>
 </head>
@@ -1061,9 +1666,9 @@
                 <h1>Transcriptor</h1>
                 <p>Audio a texto con IA</p>
             </div>
-            <div class="mode-toggle">
-                <button class="mode-btn active" id="modeSingle">Individual</button>
-                <button class="mode-btn" id="modeQueue">Cola</button>
+            <div class="mode-toggle" role="group" aria-label="Modo">
+                <button type="button" class="mode-btn active" id="modeSingle" aria-pressed="true">Individual</button>
+                <button type="button" class="mode-btn" id="modeQueue" aria-pressed="false">Cola</button>
             </div>
         </div>
 
@@ -1071,7 +1676,7 @@
             <div class="left-panel">
                 <div class="card">
                     <div class="card-label">Subir archivo<span id="labelMultiple" style="display:none">s</span></div>
-                    <div class="dropzone" id="dropzone">
+                    <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-label="Seleccionar archivo de audio">
                         <div class="dropzone-icon">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1096,13 +1701,13 @@
                             <div class="single-file-name" id="singleFileName"></div>
                             <div class="single-file-size" id="singleFileSize"></div>
                         </div>
-                        <button class="btn-info" id="singleFileInfo" title="Ver detalles">
+                        <button type="button" class="btn-info" id="singleFileInfo" title="Ver detalles" aria-label="Ver detalles del archivo">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </button>
-                        <button class="single-file-remove" id="singleFileRemove">
+                        <button type="button" class="single-file-remove" id="singleFileRemove" title="Quitar archivo" aria-label="Quitar archivo">
                             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M6 18L18 6M6 6l12 12" />
@@ -1118,14 +1723,20 @@
                         <div class="queue-list" id="queueList"></div>
                     </div>
 
-                    <button class="btn-start" id="btnStart" disabled>Iniciar</button>
+                    <div class="format-row">
+                        <span class="format-row-label">Formato</span>
+                        <span class="format-row-value" id="formatValue">Por hablante · Auto</span>
+                        <button type="button" class="format-row-btn" id="btnFormat" aria-haspopup="dialog">Cambiar</button>
+                    </div>
+
+                    <button type="button" class="btn-start" id="btnStart" disabled>Iniciar</button>
 
                     <div class="progress-mini" id="progressMini">
                         <div class="progress-mini-header">
                             <span id="progressLabel">Procesando...</span>
                             <span id="progressPercent">0%</span>
                         </div>
-                        <div class="progress-mini-track">
+                        <div class="progress-mini-track" id="progressTrack" role="progressbar" aria-label="Progreso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                             <div class="progress-mini-fill" id="progressFill"></div>
                         </div>
                     </div>
@@ -1133,7 +1744,7 @@
 
                 <div class="card log-card">
                     <div class="card-label">Registro</div>
-                    <div class="log-box" id="logBox">
+                    <div class="log-box" id="logBox" role="log" aria-live="polite">
                         <div class="log-empty" id="logEmpty">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1148,8 +1759,8 @@
             <div class="right-panel">
                 <div class="tabs-container" id="tabsContainer">
                     <div class="tabs-row">
-                        <div class="tabs-header" id="tabsHeader"></div>
-                        <button class="btn-tabs-clear" onclick="clearAll()" title="Borrar todo">
+                        <div class="tabs-header" id="tabsHeader" role="tablist" aria-label="Transcripciones" aria-orientation="horizontal"></div>
+                        <button type="button" class="btn-tabs-clear" id="btnClearAll" title="Borrar todo" aria-label="Borrar todo">
                             <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>
@@ -1161,11 +1772,12 @@
         </div>
     </div>
 
-    <div class="file-modal-overlay" id="fileModalOverlay" onclick="closeInfoModal()">
-        <div class="file-modal" onclick="event.stopPropagation()">
+    <!-- Modal: detalles del archivo -->
+    <div class="file-modal-overlay" id="fileModalOverlay" aria-hidden="true">
+        <div class="file-modal" role="dialog" aria-modal="true" aria-labelledby="fileModalTitle" tabindex="-1">
             <div class="file-modal-header">
-                <span class="file-modal-title">Detalles del archivo</span>
-                <button class="file-modal-close" onclick="closeInfoModal()">
+                <span class="file-modal-title" id="fileModalTitle">Detalles del archivo</span>
+                <button type="button" class="file-modal-close" data-close-modal aria-label="Cerrar">
                     <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
@@ -1175,7 +1787,107 @@
         </div>
     </div>
 
-    <div class="toast" id="toast">
+    <!-- Modal: descargar -->
+    <div class="file-modal-overlay" id="downloadModalOverlay" aria-hidden="true">
+        <div class="file-modal dl-modal" role="dialog" aria-modal="true" aria-labelledby="dlTitle" aria-describedby="dlSubtitle" tabindex="-1">
+            <div class="file-modal-header">
+                <div class="file-modal-heading">
+                    <span class="file-modal-title" id="dlTitle">Descargar</span>
+                    <span class="file-modal-subtitle" id="dlSubtitle"></span>
+                </div>
+                <button type="button" class="file-modal-close" data-close-modal aria-label="Cerrar">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <ul class="dl-list" id="dlList" aria-label="Archivos a descargar" hidden></ul>
+            <div class="dl-options">
+                <button type="button" class="dl-option" data-download-format="txt" data-autofocus>
+                    <span class="dl-option-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    </span>
+                    <span class="dl-option-text">
+                        <span class="dl-option-title">TXT — Texto plano</span>
+                        <span class="dl-option-desc">Para editar o pegar en otro documento</span>
+                    </span>
+                </button>
+                <button type="button" class="dl-option" data-download-format="pdf">
+                    <span class="dl-option-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    </span>
+                    <span class="dl-option-text">
+                        <span class="dl-option-title">PDF — Documento para imprimir</span>
+                        <span class="dl-option-desc">A4 con formato y numeración de páginas</span>
+                    </span>
+                </button>
+            </div>
+            <div class="file-modal-actions">
+                <button type="button" class="btn-modal" data-close-modal>Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: formato de salida -->
+    <div class="file-modal-overlay" id="formatModalOverlay" aria-hidden="true">
+        <div class="file-modal fmt-modal" role="dialog" aria-modal="true" aria-labelledby="fmtTitle" tabindex="-1">
+            <div class="file-modal-header">
+                <div class="file-modal-heading">
+                    <span class="file-modal-title" id="fmtTitle">Formato de salida</span>
+                    <span class="file-modal-subtitle">Elige cómo se organiza el texto transcrito.</span>
+                </div>
+                <button type="button" class="file-modal-close" data-close-modal aria-label="Cerrar">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="fmt-options" id="fmtOptions" role="radiogroup" aria-labelledby="fmtTitle">
+                <div class="fmt-option" role="radio" aria-checked="true" tabindex="0" data-format="speakers" aria-describedby="fmtDescSpeakers">
+                    <span class="fmt-check" aria-hidden="true">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                    </span>
+                    <div class="fmt-option-head">
+                        <span class="fmt-option-title">Por hablante</span>
+                        <span class="fmt-badge">Recomendado</span>
+                    </div>
+                    <div class="fmt-option-desc" id="fmtDescSpeakers">Detecta quién habla y agrupa cada intervención con su rango de tiempo.</div>
+                </div>
+                <div class="fmt-option" role="radio" aria-checked="false" tabindex="-1" data-format="classic" aria-describedby="fmtDescClassic">
+                    <span class="fmt-check" aria-hidden="true">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                    </span>
+                    <div class="fmt-option-head">
+                        <span class="fmt-option-title">Clásico</span>
+                    </div>
+                    <div class="fmt-option-desc" id="fmtDescClassic">Bloques fijos de 30 segundos con el formato S / Vocero.</div>
+                </div>
+            </div>
+            <div id="fmtSpeakers">
+                <div class="fmt-section-label" id="fmtSpeakersLabel">Número de hablantes</div>
+                <div class="segmented" id="fmtSpeakersGroup" role="radiogroup" aria-labelledby="fmtSpeakersLabel">
+                    <button type="button" role="radio" aria-checked="true" tabindex="0" data-speakers="auto">Auto</button>
+                    <button type="button" role="radio" aria-checked="false" tabindex="-1" data-speakers="2">2</button>
+                    <button type="button" role="radio" aria-checked="false" tabindex="-1" data-speakers="3">3</button>
+                    <button type="button" role="radio" aria-checked="false" tabindex="-1" data-speakers="4">4</button>
+                    <button type="button" role="radio" aria-checked="false" tabindex="-1" data-speakers="5">5</button>
+                    <button type="button" role="radio" aria-checked="false" tabindex="-1" data-speakers="6">6</button>
+                </div>
+                <div class="fmt-hint">Si sabes cuántas personas hablan, indicarlo mejora la precisión. Se aplica a las próximas transcripciones.</div>
+            </div>
+            <div class="fmt-section-label">
+                <span>Vista previa</span>
+                <span class="fmt-caption" id="fmtCaption"></span>
+            </div>
+            <div class="fmt-preview" id="fmtPreview" aria-label="Vista previa del formato"></div>
+            <div class="file-modal-actions">
+                <button type="button" class="btn-modal" data-close-modal>Cancelar</button>
+                <button type="button" class="btn-modal primary" id="fmtAccept">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
         </svg>
@@ -1198,84 +1910,183 @@
         const queueSection = document.getElementById('queueSection');
         const queueList = document.getElementById('queueList');
         const queueCount = document.getElementById('queueCount');
+        const formatValue = document.getElementById('formatValue');
+        const btnFormat = document.getElementById('btnFormat');
         const btnStart = document.getElementById('btnStart');
         const progressMini = document.getElementById('progressMini');
         const progressLabel = document.getElementById('progressLabel');
         const progressPercent = document.getElementById('progressPercent');
+        const progressTrack = document.getElementById('progressTrack');
         const progressFill = document.getElementById('progressFill');
         const logBox = document.getElementById('logBox');
         const logEmpty = document.getElementById('logEmpty');
         const tabsContainer = document.getElementById('tabsContainer');
         const tabsHeader = document.getElementById('tabsHeader');
         const tabsContent = document.getElementById('tabsContent');
+        const btnClearAll = document.getElementById('btnClearAll');
         const toast = document.getElementById('toast');
         const toastText = document.getElementById('toastText');
+        const fileModalOverlay = document.getElementById('fileModalOverlay');
+        const fileModalBody = document.getElementById('fileModalBody');
+        const downloadModalOverlay = document.getElementById('downloadModalOverlay');
+        const dlTitle = document.getElementById('dlTitle');
+        const dlSubtitle = document.getElementById('dlSubtitle');
+        const dlList = document.getElementById('dlList');
+        const formatModalOverlay = document.getElementById('formatModalOverlay');
+        const fmtSpeakers = document.getElementById('fmtSpeakers');
+        const fmtCaption = document.getElementById('fmtCaption');
+        const fmtPreview = document.getElementById('fmtPreview');
+        const fmtAccept = document.getElementById('fmtAccept');
+        const fmtOptionEls = [...formatModalOverlay.querySelectorAll('.fmt-option')];
+        const fmtSpeakerEls = [...formatModalOverlay.querySelectorAll('[data-speakers]')];
+
+        const MAX_FILE_BYTES = 2 * 1024 * 1024 * 1024;
+        const FORMAT_NAMES = { speakers: 'Por hablante', classic: 'Clásico' };
+        const LEGACY_STATE_KEY = 'transcriptorState';
+        const SETTINGS_KEY = 'transcriptorSettings';
 
         let isQueueMode = false;
         let singleFileData = null;
-        let queue = [];
-        let currentIndex = -1;
+        let singleFileRestored = false;   // archivo individual recuperado de IndexedDB y aún no iniciado
+        let queue = [];                   // { id, file, name, size, status, restored? }
         let isProcessing = false;
-        let transcriptions = {};
+        let processingId = null;          // id de la pestaña que se está transcribiendo
+        let pendingWait = null;           // { id, resolve } espera de archivo_completado / archivo_error
+        let abortedJob = null;            // id del trabajo cortado por desconexión
+        let transcriptions = {};          // id -> texto mostrado / copiado / descargado
+        let segmentsStore = {};           // id -> { segs: [{id,start,end,text}], labels: number[] | null }
+        let editedTabs = {};              // id -> true si el usuario guardó una edición manual distinta
         let editingStates = {};
         let fileMetadata = {};
+        let activeTabByMode = { single: null, queue: null };
+        let outputFormat = 'speakers';
+        let numSpeakers = 'auto';
+        let stateReady = false;           // saveState() no hace nada hasta que restoreState() termina
+        let dirtyBeforeReady = false;
+        let legacyKeyRemoved = false;
         let saveStateTimer = null;
-        let wasRestoredFromSave = false;
-        let singleFileRestored = false;
+        let toastTimer = null;
 
-        // --- IndexedDB helpers (persist File objects across page refresh) ---
-        const _idbReady = new Promise((resolve, reject) => {
-            const req = indexedDB.open('transcriptorFiles', 1);
-            req.onupgradeneeded = e => e.target.result.createObjectStore('files');
-            req.onsuccess = e => resolve(e.target.result);
-            req.onerror = () => reject(req.error);
-        });
-        async function idbPut(key, value) {
-            try {
-                const db = await _idbReady;
-                await new Promise((res, rej) => {
-                    const tx = db.transaction('files', 'readwrite');
-                    tx.objectStore('files').put(value, key);
-                    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
-                });
-            } catch (e) {}
+        // <render-core> --- Construcción del texto a partir de segmentos (funciones puras) ---
+        function fmtTime(sec) {
+            const s = Math.max(0, Number(sec) || 0);
+            return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
         }
-        async function idbGet(key) {
-            try {
-                const db = await _idbReady;
-                return await new Promise((res, rej) => {
-                    const tx = db.transaction('files', 'readonly');
-                    const req = tx.objectStore('files').get(key);
-                    req.onsuccess = () => res(req.result || null);
-                    req.onerror = () => rej(req.error);
-                });
-            } catch (e) { return null; }
+
+        const CAPITALIZE_SKIP = '¿¡"\'«(—';
+
+        function capitalizeFirst(text) {
+            const s = String(text || '');
+            for (let i = 0; i < s.length; i++) {
+                if (CAPITALIZE_SKIP.includes(s[i])) continue;
+                return s.slice(0, i) + s[i].toUpperCase() + s.slice(i + 1);
+            }
+            return s;
         }
-        async function idbDelete(key) {
-            try {
-                const db = await _idbReady;
-                await new Promise((res, rej) => {
-                    const tx = db.transaction('files', 'readwrite');
-                    tx.objectStore('files').delete(key);
-                    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
-                });
-            } catch (e) {}
+
+        // Formato clásico: bloques de 30 s "S / Vocero" (idéntico al antiguo group_into_blocks de Python)
+        function renderClassic(segs) {
+            if (!Array.isArray(segs) || !segs.length) return '';
+            let out = '';
+            let blkStart = segs[0].start;
+            let blkEnd = segs[0].end;
+            let texts = [segs[0].text];
+            for (let i = 1; i < segs.length; i++) {
+                const seg = segs[i];
+                if (seg.start - blkStart >= 30 && texts.length) {
+                    out += `S\nVocero\n${fmtTime(blkStart)} - ${fmtTime(blkEnd)}\n${texts.join(' ')}\n\n`;
+                    blkStart = seg.start;
+                    texts = [];
+                }
+                texts.push(seg.text);
+                blkEnd = seg.end;
+            }
+            if (texts.length) out += `S\nVocero\n${fmtTime(blkStart)} - ${fmtTime(blkEnd)}\n${texts.join(' ')}\n\n`;
+            return out;
+        }
+
+        // Formato por hablante: un párrafo numerado por turno (segmentos consecutivos del mismo hablante)
+        function renderSpeakers(segs, labels) {
+            if (!Array.isArray(segs) || !segs.length) return '';
+            const lab = Array.isArray(labels) ? labels : [];
+            const fallback = lab.length < segs.length;   // sin diarización (o incompleta): también corta por pausas
+            let out = '';
+            let n = 0;
+            let turn = null;
+            const flush = () => {
+                if (!turn) return;
+                n += 1;
+                out += `${n}\nSpeaker ${turn.label + 1}\n${fmtTime(turn.start)} - ${fmtTime(turn.end)}\n${capitalizeFirst(turn.texts.join(' '))}\n\n`;
+            };
+            for (let i = 0; i < segs.length; i++) {
+                const seg = segs[i];
+                const raw = i < lab.length ? lab[i] : 0;
+                const label = Number.isInteger(raw) && raw >= 0 ? raw : 0;
+                const gapBreak = fallback && turn !== null &&
+                    Math.round((seg.start - turn.end) * 100) / 100 >= 2.0;
+                if (!turn || label !== turn.label || gapBreak) {
+                    flush();
+                    turn = { label, start: seg.start, end: seg.end, texts: [] };
+                }
+                turn.texts.push(seg.text);
+                turn.end = seg.end;
+            }
+            flush();
+            return out;
+        }
+
+        function renderSegments(store, format) {
+            if (!store || !Array.isArray(store.segs) || !store.segs.length) return '';
+            return format === 'classic' ? renderClassic(store.segs) : renderSpeakers(store.segs, store.labels);
+        }
+        // </render-core>
+
+        function renderStore(id) {
+            return renderSegments(segmentsStore[id], outputFormat);
+        }
+
+        function hasSegments(id) {
+            const st = segmentsStore[id];
+            return !!(st && Array.isArray(st.segs) && st.segs.length);
+        }
+
+        function normalizeStore(raw) {
+            if (!raw || !Array.isArray(raw.segs)) return null;
+            const segs = raw.segs
+                .filter(s => s && typeof s.text === 'string')
+                .map(s => ({ id: s.id, start: Number(s.start) || 0, end: Number(s.end) || 0, text: s.text }));
+            return { segs, labels: Array.isArray(raw.labels) ? raw.labels.slice() : null };
+        }
+
+        // --- Utilidades ---
+        function escapeHtml(value) {
+            return String(value == null ? '' : value).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            })[c]);
+        }
+
+        function currentMode() {
+            return isQueueMode ? 'queue' : 'single';
         }
 
         function formatBytes(bytes) {
-            if (bytes < 1024) return bytes + ' B';
-            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-            return (bytes / 1048576).toFixed(1) + ' MB';
+            const b = Number(bytes) || 0;
+            if (b < 1024) return b + ' B';
+            if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+            return (b / 1048576).toFixed(1) + ' MB';
         }
 
         function generateId() {
-            return 'f' + Math.random().toString(36).substr(2, 9);
+            return 'f' + Math.random().toString(36).slice(2, 11);
         }
 
-        function showToast(msg) {
+        function showToast(msg, ms = 2500) {
             toastText.textContent = msg;
+            toast.classList.remove('visible');
+            void toast.offsetWidth;   // reinicia la animación si ya estaba visible
             toast.classList.add('visible');
-            setTimeout(() => toast.classList.remove('visible'), 2500);
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('visible'), ms);
         }
 
         function fmtDuration(secs) {
@@ -1297,114 +2108,342 @@
             });
         }
 
+        function withTimeout(promise, ms, fallback) {
+            return Promise.race([promise, new Promise(resolve => setTimeout(() => resolve(fallback), ms))]);
+        }
+
+        // --- IndexedDB: 'files' (objetos File) y 'state' (estado de la app) ---
+        const _idbReady = new Promise((resolve, reject) => {
+            if (!window.indexedDB) { reject(new Error('IndexedDB no disponible')); return; }
+            const req = indexedDB.open('transcriptorFiles', 2);
+            req.onupgradeneeded = () => {
+                const db = req.result;
+                if (!db.objectStoreNames.contains('files')) db.createObjectStore('files');
+                if (!db.objectStoreNames.contains('state')) db.createObjectStore('state');
+            };
+            req.onsuccess = () => {
+                const db = req.result;
+                db.onversionchange = () => db.close();
+                resolve(db);
+            };
+            req.onerror = () => reject(req.error);
+            req.onblocked = () => addLog('warning', 'Cierra las otras pestañas del transcriptor para actualizar el almacenamiento local');
+        });
+        _idbReady.catch(() => { });
+
+        function idbRun(storeName, mode, op) {
+            return _idbReady.then(db => new Promise((resolve, reject) => {
+                const tx = db.transaction(storeName, mode);
+                const req = op(tx.objectStore(storeName));
+                tx.oncomplete = () => resolve(req ? req.result : undefined);
+                tx.onerror = () => reject(tx.error);
+                tx.onabort = () => reject(tx.error);
+            }));
+        }
+
+        async function idbPut(key, value, storeName = 'files') {
+            try { await idbRun(storeName, 'readwrite', s => s.put(value, key)); return true; } catch (e) { return false; }
+        }
+
+        async function idbGet(key, storeName = 'files') {
+            try { return (await idbRun(storeName, 'readonly', s => s.get(key))) || null; } catch (e) { return null; }
+        }
+
+        async function idbDelete(key, storeName = 'files') {
+            try { await idbRun(storeName, 'readwrite', s => s.delete(key)); return true; } catch (e) { return false; }
+        }
+
+        async function idbClear(storeName) {
+            try { await idbRun(storeName, 'readwrite', s => s.clear()); return true; } catch (e) { return false; }
+        }
+
+        // --- Modales: Escape cierra el de arriba, foco al primer control, foco devuelto al cerrar ---
+        const modalStack = [];
+        let overlayPointerTarget = null;
+
+        function getFocusable(root) {
+            return [...root.querySelectorAll('button, [href], input, select, textarea, [tabindex]')]
+                .filter(el => !el.disabled && el.tabIndex >= 0 && !el.closest('[hidden]') && el.getClientRects().length > 0);
+        }
+
+        function lockScroll() {
+            if (document.body.classList.contains('modal-open')) return;
+            const scrollbar = window.innerWidth - document.documentElement.clientWidth;
+            if (scrollbar > 0) document.body.style.paddingRight = scrollbar + 'px';
+            document.body.classList.add('modal-open');
+        }
+
+        function unlockScroll() {
+            document.body.classList.remove('modal-open');
+            document.body.style.paddingRight = '';
+        }
+
+        function openModal(overlay, focusEl = null) {
+            if (modalStack.some(m => m.overlay === overlay)) return;
+            modalStack.push({ overlay, restore: document.activeElement });
+            overlay.classList.add('open');
+            overlay.setAttribute('aria-hidden', 'false');
+            lockScroll();
+            const dialog = overlay.querySelector('[role="dialog"]');
+            dialog.scrollTop = 0;
+            requestAnimationFrame(() => {
+                if (!overlay.classList.contains('open')) return;
+                const target = focusEl || dialog.querySelector('[data-autofocus]') || getFocusable(dialog)[0] || dialog;
+                target.focus({ preventScroll: true });
+            });
+        }
+
+        function closeModal(overlay) {
+            const idx = modalStack.findIndex(m => m.overlay === overlay);
+            if (idx === -1) return;
+            const [entry] = modalStack.splice(idx, 1);
+            overlay.classList.remove('open');
+            overlay.setAttribute('aria-hidden', 'true');
+            if (!modalStack.length) unlockScroll();
+            const back = entry.restore;
+            if (back && back !== document.body && document.contains(back) && typeof back.focus === 'function') {
+                back.focus({ preventScroll: true });
+            }
+        }
+
+        function closeTopModal() {
+            const top = modalStack[modalStack.length - 1];
+            if (!top) return false;
+            closeModal(top.overlay);
+            return true;
+        }
+
+        function trapFocus(e) {
+            const top = modalStack[modalStack.length - 1];
+            if (!top) return;
+            const dialog = top.overlay.querySelector('[role="dialog"]');
+            const items = getFocusable(dialog);
+            if (!items.length) { e.preventDefault(); dialog.focus(); return; }
+            const first = items[0];
+            const last = items[items.length - 1];
+            const active = document.activeElement;
+            if (!dialog.contains(active)) { e.preventDefault(); first.focus(); }
+            else if (e.shiftKey && (active === first || active === dialog)) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus(); }
+        }
+
+        [fileModalOverlay, downloadModalOverlay, formatModalOverlay].forEach(overlay => {
+            overlay.addEventListener('pointerdown', e => { overlayPointerTarget = e.target; });
+            overlay.addEventListener('click', e => {
+                // Clic fuera del diálogo (que empezó también fuera, para no cerrar al seleccionar texto)
+                if (e.target === overlay && overlayPointerTarget === overlay) closeModal(overlay);
+                else if (e.target.closest('[data-close-modal]')) closeModal(overlay);
+                overlayPointerTarget = null;
+            });
+        });
+
+        // --- Modal de detalles del archivo ---
         function openInfoModal(metaId) {
             const meta = fileMetadata[metaId];
             if (!meta) return;
-            document.getElementById('fileModalBody').innerHTML = `
+            fileModalBody.innerHTML = `
                 <div class="meta-file-icon">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
                 </div>
-                <div class="meta-row"><span class="meta-label">Nombre</span><span class="meta-value">${meta.name}</span></div>
+                <div class="meta-row"><span class="meta-label">Nombre</span><span class="meta-value">${escapeHtml(meta.name)}</span></div>
                 <div class="meta-row"><span class="meta-label">Tamaño</span><span class="meta-value">${formatBytes(meta.size)}</span></div>
                 <div class="meta-row"><span class="meta-label">Duración</span><span class="meta-value">${fmtDuration(meta.duration)}</span></div>
-                <div class="meta-row"><span class="meta-label">Tipo</span><span class="meta-value">${meta.type || 'audio/mpeg'}</span></div>
+                <div class="meta-row"><span class="meta-label">Tipo</span><span class="meta-value">${escapeHtml(meta.type || 'audio/mpeg')}</span></div>
                 <div class="meta-row"><span class="meta-label">Modificado</span><span class="meta-value">${meta.lastModified ? new Date(meta.lastModified).toLocaleString('es-PE') : '—'}</span></div>
             `;
-            document.getElementById('fileModalOverlay').classList.add('open');
+            openModal(fileModalOverlay);
         }
 
         function closeInfoModal() {
-            document.getElementById('fileModalOverlay').classList.remove('open');
+            closeModal(fileModalOverlay);
         }
 
-        function saveState() {
-            const tabData = [...tabsHeader.children].map(btn => ({
-                id: btn.id.replace('tab-', ''),
+        // --- Persistencia (IndexedDB 'state', clave 'app') ---
+        function normalizeSpeakers(value) {
+            if (value === 'auto' || value === null || value === undefined) return 'auto';
+            const n = Number(value);
+            return Number.isInteger(n) && n >= 2 && n <= 6 ? n : 'auto';
+        }
+
+        function loadSettings(state) {
+            let src = state && (state.outputFormat || state.numSpeakers) ? state : null;
+            if (!src) {
+                try { src = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null'); } catch (e) { src = null; }
+            }
+            if (src) {
+                outputFormat = src.outputFormat === 'classic' ? 'classic' : 'speakers';
+                numSpeakers = normalizeSpeakers(src.numSpeakers);
+            }
+        }
+
+        function saveSettings() {
+            try { localStorage.setItem(SETTINGS_KEY, JSON.stringify({ outputFormat, numSpeakers })); } catch (e) { }
+        }
+
+        function buildState() {
+            const tabs = [...tabsHeader.querySelectorAll('.tab-btn')].map(btn => ({
+                id: btn.dataset.id,
                 name: btn.dataset.name || '',
                 dotStatus: (btn.querySelector('.tab-status')?.className || '').replace('tab-status', '').trim(),
                 tabMode: btn.dataset.tabMode || 'single'
             }));
-            const state = {
-                mode: isQueueMode ? 'queue' : 'single',
-                transcriptions: { ...transcriptions },
-                tabs: tabData,
+            return {
+                version: 2,
+                mode: currentMode(),
+                outputFormat,
+                numSpeakers,
+                tabs,
                 queue: queue.map(({ id, name, size, status }) => ({ id, name, size, status })),
-                fileMetadata: { ...fileMetadata }
+                fileMetadata: { ...fileMetadata },
+                transcriptions: { ...transcriptions },
+                segmentsStore,
+                editedTabs: { ...editedTabs },
+                activeTabByMode: { ...activeTabByMode }
             };
-            try { localStorage.setItem('transcriptorState', JSON.stringify(state)); } catch (e) { }
+        }
+
+        function saveState() {
+            if (!stateReady) { dirtyBeforeReady = true; return Promise.resolve(false); }
+            clearTimeout(saveStateTimer);
+            saveStateTimer = null;
+            saveSettings();
+            let state;
+            try { state = buildState(); } catch (e) { return Promise.resolve(false); }
+            return idbPut('app', state, 'state').then(ok => {
+                if (ok && !legacyKeyRemoved) {
+                    legacyKeyRemoved = true;
+                    try { localStorage.removeItem(LEGACY_STATE_KEY); } catch (e) { }
+                }
+                return ok;
+            });
         }
 
         function debouncedSaveState() {
+            if (!stateReady) return;
             clearTimeout(saveStateTimer);
             saveStateTimer = setTimeout(saveState, 2000);
         }
 
-        async function restoreState() {
-            try {
-                const raw = localStorage.getItem('transcriptorState');
-                if (!raw) return;
-                const state = JSON.parse(raw);
-
-                if (state.fileMetadata) Object.assign(fileMetadata, state.fileMetadata);
-                if (state.transcriptions) Object.assign(transcriptions, state.transcriptions);
-
-                if (state.mode === 'queue') setMode(true, true); // skipSave: avoid overwriting state before tabs/queue are restored
-
-                if (state.tabs && state.tabs.length > 0) {
-                    state.tabs.forEach(tab => {
-                        const dotStatus = tab.dotStatus === 'processing' ? 'error' : tab.dotStatus;
-                        const tabMode = tab.tabMode || (state.mode === 'queue' ? 'queue' : 'single');
-                        createTab(tab.id, tab.name, tabMode);
-                        updateTabStatus(tab.id, dotStatus);
-                        const textEl = document.getElementById(`text-${tab.id}`);
-                        if (textEl && transcriptions[tab.id]) {
-                            textEl.textContent = transcriptions[tab.id];
-                        }
-                    });
-                }
-
-                if (state.queue && state.queue.length > 0) {
-                    const pendingItems = state.queue.filter(item => item.status === 'pending');
-                    const otherItems = state.queue.filter(item => item.status !== 'pending');
-
-                    otherItems.forEach(item => {
-                        queue.push({ id: item.id, name: item.name, size: item.size, status: item.status === 'processing' ? 'error' : item.status });
-                    });
-
-                    if (pendingItems.length > 0) {
-                        const recoveries = await Promise.all(pendingItems.map(async item => ({
-                            item, file: await idbGet(item.id)
-                        })));
-                        recoveries.forEach(({ item, file }) => {
-                            if (file) {
-                                queue.push({ id: item.id, file, name: item.name, size: item.size, status: 'pending' });
-                            } else {
-                                queue.push({ id: item.id, name: item.name, size: item.size, status: 'error' });
-                                updateTabStatus(item.id, 'error');
-                            }
-                        });
-                    }
-
-                    wasRestoredFromSave = true;
-                    renderQueue();
-                    updateStartButton();
-                }
-
-                if (!isQueueMode) {
-                    const savedSingle = await idbGet('single');
-                    if (savedSingle) {
-                        singleFileData = savedSingle;
-                        if (!fileMetadata['single']) fileMetadata['single'] = { name: savedSingle.name, size: savedSingle.size, type: savedSingle.type || 'audio/mpeg', lastModified: savedSingle.lastModified, duration: null };
-                        singleFileName.textContent = savedSingle.name;
-                        singleFileSize.textContent = formatBytes(savedSingle.size);
-                        singleFile.classList.add('visible');
-                        singleFileRestored = true;
-                        updateStartButton();
-                    }
-                }
-            } catch (e) { }
+        function flushSave() {
+            if (stateReady && saveStateTimer) saveState();
         }
 
+        async function restoreState() {
+            try {
+                let state = await withTimeout(idbGet('app', 'state'), 5000, null);
+                let fromLegacy = false;
+                if (!state) {
+                    try {
+                        const raw = localStorage.getItem(LEGACY_STATE_KEY);
+                        if (raw) { state = JSON.parse(raw); fromLegacy = true; }
+                    } catch (e) { state = null; }
+                }
+                loadSettings(state);
+                updateFormatRow();
+                if (state && typeof state === 'object') {
+                    try { await applyState(state, fromLegacy); } catch (e) { console.error('restoreState', e); }
+                    if (fromLegacy) dirtyBeforeReady = true;   // migra a IndexedDB en cuanto esté listo
+                }
+
+                const savedSingle = await withTimeout(idbGet('single'), 5000, null);
+                if (savedSingle) {
+                    singleFileData = savedSingle;
+                    singleFileRestored = true;
+                    if (!fileMetadata['single']) {
+                        fileMetadata['single'] = { name: savedSingle.name, size: savedSingle.size, type: savedSingle.type || 'audio/mpeg', lastModified: savedSingle.lastModified, duration: null };
+                    }
+                } else {
+                    delete fileMetadata['single'];
+                }
+            } catch (e) {
+                console.error('restoreState', e);
+            } finally {
+                stateReady = true;
+                renderSingleFile();
+                renderQueue();
+                updateStartButton();
+                if (dirtyBeforeReady) { dirtyBeforeReady = false; saveState(); }
+            }
+        }
+
+        async function applyState(state, fromLegacy) {
+            if (state.fileMetadata && typeof state.fileMetadata === 'object') Object.assign(fileMetadata, state.fileMetadata);
+            if (state.transcriptions && typeof state.transcriptions === 'object') Object.assign(transcriptions, state.transcriptions);
+            if (!fromLegacy) {
+                // Las pestañas antiguas (localStorage) solo tienen texto: se muestran tal cual
+                if (state.segmentsStore && typeof state.segmentsStore === 'object') {
+                    Object.keys(state.segmentsStore).forEach(id => {
+                        const st = normalizeStore(state.segmentsStore[id]);
+                        if (st) segmentsStore[id] = st;
+                    });
+                }
+                if (state.editedTabs && typeof state.editedTabs === 'object') {
+                    Object.keys(state.editedTabs).forEach(id => { if (state.editedTabs[id]) editedTabs[id] = true; });
+                }
+            }
+            // createTab() activa la primera pestaña de cada modo: se guarda lo recordado para aplicarlo al final
+            const rememberedTabs = { single: null, queue: null };
+            if (!fromLegacy && state.activeTabByMode && typeof state.activeTabByMode === 'object') {
+                rememberedTabs.single = state.activeTabByMode.single || null;
+                rememberedTabs.queue = state.activeTabByMode.queue || null;
+            }
+
+            if (state.mode === 'queue') setMode(true, true); // skipSave: no sobrescribir antes de restaurar pestañas/cola
+
+            const tabIds = new Set();
+            (Array.isArray(state.tabs) ? state.tabs : []).forEach(tab => {
+                if (!tab || !tab.id || tabIds.has(tab.id)) return;
+                tabIds.add(tab.id);
+                const wasProcessing = tab.dotStatus === 'processing';
+                const dotStatus = wasProcessing ? 'error' : (tab.dotStatus || '');
+                const tabMode = tab.tabMode === 'queue' || tab.tabMode === 'single'
+                    ? tab.tabMode : (state.mode === 'queue' ? 'queue' : 'single');
+                const name = tab.name || 'audio';
+                createTab(tab.id, name, tabMode);
+                if (dotStatus) updateTabStatus(tab.id, dotStatus);
+                if (hasSegments(tab.id) && !editedTabs[tab.id]) transcriptions[tab.id] = renderStore(tab.id);
+                const textEl = document.getElementById(`text-${tab.id}`);
+                if (textEl) textEl.textContent = transcriptions[tab.id] || '';
+                if (wasProcessing) addLog('warning', `Transcripción interrumpida: ${name}`);
+            });
+
+            // Limpieza de datos huérfanos (pestañas que ya no existen)
+            [transcriptions, segmentsStore, editedTabs].forEach(obj => {
+                Object.keys(obj).forEach(id => { if (!tabIds.has(id)) delete obj[id]; });
+            });
+            Object.keys(fileMetadata).forEach(id => { if (id !== 'single' && !tabIds.has(id)) delete fileMetadata[id]; });
+
+            if (Array.isArray(state.queue) && state.queue.length > 0) {
+                state.queue.forEach(item => {
+                    if (item && item.id && !tabIds.has(item.id)) idbDelete(item.id);   // archivo huérfano
+                });
+                const items = state.queue.filter(item => item && item.id && tabIds.has(item.id));
+                const recovered = await Promise.all(items.map(async item => ({
+                    item, file: item.status === 'pending' ? await withTimeout(idbGet(item.id), 5000, null) : null
+                })));
+                recovered.forEach(({ item, file }) => {
+                    if (item.status === 'pending') {
+                        if (file) {
+                            queue.push({ id: item.id, file, name: item.name, size: item.size, status: 'pending', restored: true });
+                        } else {
+                            queue.push({ id: item.id, name: item.name, size: item.size, status: 'error' });
+                            updateTabStatus(item.id, 'error');
+                        }
+                    } else {
+                        queue.push({ id: item.id, name: item.name, size: item.size, status: item.status === 'processing' ? 'error' : item.status });
+                    }
+                });
+            }
+
+            ['single', 'queue'].forEach(mode => {
+                const remembered = rememberedTabs[mode];
+                if (!remembered || getTabBtn(remembered)?.dataset.tabMode !== mode) return;
+                if (mode === currentMode()) switchTab(remembered);
+                else activeTabByMode[mode] = remembered;
+            });
+        }
+
+        // --- Registro ---
         const LOG_ICONS = {
             info: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
             success: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
@@ -1413,45 +2452,43 @@
         };
 
         function addLog(type, msg) {
+            const kind = LOG_ICONS[type] ? type : 'info';
             logEmpty.style.display = 'none';
             const item = document.createElement('div');
-            item.className = `log-item ${type}`;
-            item.innerHTML = `${LOG_ICONS[type]}<span>${msg}</span>`;
+            item.className = `log-item ${kind}`;
+            item.innerHTML = LOG_ICONS[kind];
+            const span = document.createElement('span');
+            span.textContent = msg == null ? '' : String(msg);   // los mensajes incluyen nombres de archivo: nunca innerHTML
+            item.appendChild(span);
             logBox.appendChild(item);
             logBox.scrollTop = logBox.scrollHeight;
         }
 
+        // --- Modo, archivo individual y botón Iniciar ---
         function setMode(queueMode, skipSave = false) {
             isQueueMode = queueMode;
             modeSingle.classList.toggle('active', !queueMode);
             modeQueue.classList.toggle('active', queueMode);
+            modeSingle.setAttribute('aria-pressed', String(!queueMode));
+            modeQueue.setAttribute('aria-pressed', String(queueMode));
             labelMultiple.style.display = queueMode ? 'inline' : 'none';
             dropHint.textContent = queueMode ? 'o clic para seleccionar varios' : 'o clic para seleccionar';
             fileInput.multiple = queueMode;
+            queueSection.classList.toggle('visible', queueMode);
+            if (queueMode) renderQueue();
+            renderSingleFile();   // el archivo individual se conserva, solo se oculta en Cola
 
-            if (queueMode) {
-                singleFile.classList.remove('visible');
-                singleFileData = null;
-                queueSection.classList.add('visible');
-                renderQueue();
-            } else {
-                queueSection.classList.remove('visible');
-            }
-
-            const targetMode = queueMode ? 'queue' : 'single';
-            let hasVisibleActive = false;
+            const target = currentMode();
             tabsHeader.querySelectorAll('.tab-btn').forEach(btn => {
-                const visible = btn.dataset.tabMode === targetMode;
-                btn.style.display = visible ? '' : 'none';
-                if (!visible) btn.classList.remove('active');
-                else if (btn.classList.contains('active')) hasVisibleActive = true;
+                btn.style.display = btn.dataset.tabMode === target ? '' : 'none';
             });
-            tabsContent.querySelectorAll('.tab-content').forEach(c => {
-                if (c.dataset.tabMode !== targetMode) c.classList.remove('active');
-            });
-            if (!hasVisibleActive) {
-                const first = tabsHeader.querySelector(`.tab-btn[data-tab-mode="${targetMode}"]`);
-                if (first) switchTab(first.id.replace('tab-', ''));
+            const remembered = activeTabByMode[target];
+            if (remembered && getTabBtn(remembered)?.dataset.tabMode === target) {
+                switchTab(remembered);
+            } else {
+                const first = tabsOfMode(target)[0];
+                if (first) switchTab(first.dataset.id);
+                else deactivateTabs();
             }
 
             updateTabsVisibility();
@@ -1459,29 +2496,46 @@
             if (!skipSave) saveState();
         }
 
-        function updateTabsVisibility() {
-            const targetMode = isQueueMode ? 'queue' : 'single';
-            const hasVisible = [...tabsHeader.children].some(b => b.dataset.tabMode === targetMode);
-            tabsContainer.classList.toggle('visible', hasVisible);
+        function renderSingleFile() {
+            if (singleFileData) {
+                singleFileName.textContent = singleFileData.name;
+                singleFileName.title = singleFileData.name;
+                singleFileSize.textContent = formatBytes(singleFileData.size);
+            }
+            singleFile.classList.toggle('visible', !isQueueMode && !!singleFileData);
         }
 
         function updateStartButton() {
-            if (isQueueMode) {
-                const pending = queue.filter(f => f.status === 'pending').length;
-                btnStart.disabled = pending === 0 || isProcessing;
-                if (isProcessing) {
-                    btnStart.textContent = 'Procesando...';
-                } else {
-                    btnStart.textContent = wasRestoredFromSave && pending > 0 ? `Reanudar (${pending})` : `Iniciar (${pending})`;
-                }
-            } else {
-                btnStart.disabled = !singleFileData || isProcessing;
-                if (isProcessing) {
-                    btnStart.textContent = 'Procesando...';
-                } else {
-                    btnStart.textContent = singleFileRestored ? 'Reanudar' : 'Iniciar';
-                }
+            if (isProcessing) {
+                btnStart.disabled = true;
+                btnStart.textContent = 'Procesando...';
+                return;
             }
+            if (isQueueMode) {
+                const pending = queue.filter(f => f.status === 'pending');
+                if (pending.length === 0) {
+                    btnStart.disabled = true;
+                    btnStart.textContent = 'Iniciar';
+                } else {
+                    btnStart.disabled = false;
+                    btnStart.textContent = pending.some(f => f.restored === true)
+                        ? `Reanudar (${pending.length})` : `Iniciar (${pending.length})`;
+                }
+            } else if (!singleFileData) {
+                btnStart.disabled = true;
+                btnStart.textContent = 'Iniciar';
+            } else {
+                btnStart.disabled = false;
+                btnStart.textContent = singleFileRestored ? 'Reanudar' : 'Iniciar';
+            }
+        }
+
+        function updateFormatRow() {
+            let text;
+            if (outputFormat === 'classic') text = 'Clásico (bloques de 30 s)';
+            else text = numSpeakers === 'auto' ? 'Por hablante · Auto' : `Por hablante · ${numSpeakers} hablantes`;
+            formatValue.textContent = text;
+            formatValue.title = text;
         }
 
         function isAccepted(file) {
@@ -1489,8 +2543,16 @@
                    file.name.endsWith('.mp3') || file.name.endsWith('.mp4');
         }
 
+        // --- Cola ---
+        const QUEUE_ICONS = {
+            processing: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>',
+            completed: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+            error: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>',
+            pending: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>'
+        };
+
         function addToQueue(file) {
-            if (file.size > 2 * 1024 * 1024 * 1024) {
+            if (file.size > MAX_FILE_BYTES) {
                 addLog('error', `${file.name}: excede 2GB`);
                 return;
             }
@@ -1504,449 +2566,846 @@
             transcriptions[id] = '';
             idbPut(id, file);
             renderQueue();
+            createTab(id, file.name, 'queue');
             updateStartButton();
-            createTab(id, file.name);
-            getAudioDuration(file).then(dur => { fileMetadata[id].duration = dur; });
+            getAudioDuration(file).then(dur => { if (fileMetadata[id]) fileMetadata[id].duration = dur; });
             saveState();
         }
 
         function removeFromQueue(id) {
-            queue = queue.filter(f => f.id !== id);
-            delete transcriptions[id];
-            delete fileMetadata[id];
-            idbDelete(id);
-            renderQueue();
-            updateStartButton();
-            removeTab(id);
-            saveState();
+            closeTab(id);
         }
 
         function renderQueue() {
-            queueList.innerHTML = '';
             queueCount.textContent = queue.length;
-            queue.forEach(item => {
-                const div = document.createElement('div');
-                div.className = `queue-item ${item.status}`;
-                div.innerHTML = `
-                    <div class="queue-icon ${item.status}">
-                        ${item.status === 'processing' ? '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>' :
-                        item.status === 'completed' ? '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>' :
-                            item.status === 'error' ? '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>' :
-                                '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>'}
-                    </div>
-                    <div class="queue-info">
-                        <div class="queue-name">${item.name}</div>
-                        <div class="queue-status">${item.status === 'processing' ? 'Procesando...' : item.status === 'completed' ? 'Completado' : item.status === 'error' ? 'Error' : formatBytes(item.size)}</div>
-                    </div>
-                    <button class="btn-info" onclick="openInfoModal('${item.id}')" title="Ver detalles"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></button>
-                    ${item.status === 'pending' ? `<button class="queue-remove" onclick="removeFromQueue('${item.id}')"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>` : ''}
-                `;
-                queueList.appendChild(div);
-            });
+            queueList.innerHTML = queue.map(item => {
+                const status = QUEUE_ICONS[item.status] ? item.status : 'pending';
+                const statusText = status === 'processing' ? 'Procesando...'
+                    : status === 'completed' ? 'Completado'
+                    : status === 'error' ? 'Error'
+                    : formatBytes(item.size);
+                const name = escapeHtml(item.name);
+                return `
+                    <div class="queue-item ${status}" data-id="${escapeHtml(item.id)}">
+                        <div class="queue-icon ${status}">${QUEUE_ICONS[status]}</div>
+                        <div class="queue-info">
+                            <div class="queue-name" title="${name}">${name}</div>
+                            <div class="queue-status">${statusText}</div>
+                        </div>
+                        <button type="button" class="btn-info" data-action="info" title="Ver detalles" aria-label="Ver detalles de ${name}"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></button>
+                        ${status === 'pending' ? `<button type="button" class="queue-remove" data-action="remove" title="Quitar de la cola" aria-label="Quitar ${name}"><svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>` : ''}
+                    </div>`;
+            }).join('');
+        }
+
+        queueList.addEventListener('click', e => {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+            const id = btn.closest('.queue-item')?.dataset.id;
+            if (!id) return;
+            if (btn.dataset.action === 'info') openInfoModal(id);
+            else if (btn.dataset.action === 'remove') removeFromQueue(id);
+        });
+
+        // --- Pestañas ---
+        const ICON = {
+            music: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>',
+            edit: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>',
+            save: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+            copy: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>',
+            download: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>',
+            downloadAll: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>',
+            close: '<svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>'
+        };
+
+        function getTabBtn(id) {
+            return document.getElementById(`tab-${id}`);
+        }
+
+        function tabsOfMode(mode) {
+            return [...tabsHeader.querySelectorAll('.tab-btn')].filter(b => b.dataset.tabMode === mode);
+        }
+
+        function visibleTabs() {
+            return tabsOfMode(currentMode());
+        }
+
+        function getTabName(id) {
+            return getTabBtn(id)?.dataset.name || fileMetadata[id]?.name || 'audio';
         }
 
         function createTab(id, name, tabMode = null) {
-            const mode = tabMode !== null ? tabMode : (isQueueMode ? 'queue' : 'single');
-            const currentMode = isQueueMode ? 'queue' : 'single';
+            const mode = tabMode || currentMode();
+            const safeName = escapeHtml(name);
 
-            const btn = document.createElement('button');
+            // role="tab" en un <div>: la "x" es un <button> anidado (no se permiten botones dentro de botones)
+            const btn = document.createElement('div');
             btn.className = 'tab-btn';
             btn.id = `tab-${id}`;
+            btn.dataset.id = id;
             btn.dataset.name = name;
             btn.dataset.tabMode = mode;
-            if (mode !== currentMode) btn.style.display = 'none';
-            btn.innerHTML = `<span class="tab-status"></span><span>${name.length > 20 ? name.substr(0, 18) + '...' : name}</span><button class="tab-close" onclick="event.stopPropagation();closeTab('${id}')" title="Cerrar"><svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg></button>`;
-            btn.onclick = () => switchTab(id);
+            btn.setAttribute('role', 'tab');
+            btn.setAttribute('aria-selected', 'false');
+            btn.setAttribute('aria-controls', `content-${id}`);
+            btn.tabIndex = -1;
+            btn.title = name;
+            if (mode !== currentMode()) btn.style.display = 'none';
+            btn.innerHTML = `<span class="tab-status" aria-hidden="true"></span><span class="tab-label">${safeName}</span><button type="button" class="tab-close" tabindex="-1" title="Cerrar" aria-label="Cerrar ${safeName}">${ICON.close}</button>`;
             tabsHeader.appendChild(btn);
 
             const content = document.createElement('div');
             content.className = 'tab-content';
             content.id = `content-${id}`;
+            content.dataset.id = id;
             content.dataset.tabMode = mode;
+            content.setAttribute('role', 'tabpanel');
+            content.setAttribute('aria-labelledby', `tab-${id}`);
             content.innerHTML = `
                 <div class="result-card">
                     <div class="result-header">
                         <div class="result-filename">
-                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/></svg>
-                            ${name}
+                            ${ICON.music}
+                            <span class="result-filename-text" title="${safeName}">${safeName}</span>
                         </div>
                         <div class="result-actions">
-                            <button class="btn-action" onclick="toggleEdit('${id}')">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                                Editar
-                            </button>
-                            <button class="btn-action save-btn" onclick="saveEdit('${id}')">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                                Guardar
-                            </button>
-                            <button class="btn-action" onclick="copyText('${id}')">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                Copiar
-                            </button>
-                            <button class="btn-action" onclick="downloadText('${id}', '${name}')">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                                Descargar
-                            </button>
-                            <button class="btn-action" onclick="exportPDF('${id}', '${name}')">
-                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-                                PDF
-                            </button>
+                            <button type="button" class="btn-action" data-action="edit" aria-pressed="false" title="Editar">${ICON.edit}Editar</button>
+                            <button type="button" class="btn-action save-btn" data-action="save">${ICON.save}Guardar</button>
+                            <button type="button" class="btn-action" data-action="copy">${ICON.copy}Copiar</button>
+                            <button type="button" class="btn-action" data-action="download" aria-haspopup="dialog">${ICON.download}Descargar</button>
+                            <button type="button" class="btn-action" data-action="download-all" aria-haspopup="dialog">${ICON.downloadAll}Descargar todo</button>
                         </div>
                     </div>
-                    <div class="result-text" id="text-${id}" contenteditable="false"></div>
+                    <div class="result-text" id="text-${id}" contenteditable="false" aria-label="Transcripción de ${safeName}"></div>
                 </div>
             `;
             tabsContent.appendChild(content);
 
-            if (mode === currentMode) {
-                const activeInMode = [...tabsHeader.children].find(b => b.dataset.tabMode === mode && b.classList.contains('active'));
-                if (!activeInMode) switchTab(id);
-            }
-
+            if (mode === currentMode() && !tabsOfMode(mode).some(b => b.classList.contains('active'))) switchTab(id);
             updateTabsVisibility();
         }
 
-        function removeTab(id) {
-            document.getElementById(`tab-${id}`)?.remove();
-            document.getElementById(`content-${id}`)?.remove();
-            updateTabsVisibility();
-            const currentMode = isQueueMode ? 'queue' : 'single';
-            const visibleTabs = [...tabsHeader.children].filter(b => b.dataset.tabMode === currentMode);
-            if (visibleTabs.length > 0 && !document.querySelector('.tab-btn.active')) {
-                switchTab(visibleTabs[0].id.replace('tab-', ''));
-            }
+        function deactivateTabs() {
+            tabsHeader.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active');
+                b.setAttribute('aria-selected', 'false');
+                b.tabIndex = -1;
+            });
+            tabsContent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
         }
 
-        function switchTab(id) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(`tab-${id}`)?.classList.add('active');
-            document.getElementById(`content-${id}`)?.classList.add('active');
+        function switchTab(id, focus = false) {
+            const btn = getTabBtn(id);
+            if (!btn) return;
+            tabsHeader.querySelectorAll('.tab-btn').forEach(b => {
+                const on = b === btn;
+                b.classList.toggle('active', on);
+                b.setAttribute('aria-selected', String(on));
+                b.tabIndex = on ? 0 : -1;   // roving tabindex
+            });
+            tabsContent.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === `content-${id}`));
+            activeTabByMode[btn.dataset.tabMode] = id;
+            if (focus) {
+                btn.focus({ preventScroll: true });
+                btn.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            }
+            debouncedSaveState();
+        }
+
+        // Activa la pestaña del archivo en proceso solo si pertenece al modo visible
+        function showProcessingTab(id) {
+            const btn = getTabBtn(id);
+            if (!btn) return;
+            if (btn.dataset.tabMode === currentMode()) switchTab(id);
+            else activeTabByMode[btn.dataset.tabMode] = id;
+        }
+
+        function updateTabsVisibility() {
+            tabsContainer.classList.toggle('visible', visibleTabs().length > 0);
         }
 
         function updateTabStatus(id, status) {
-            const tab = document.getElementById(`tab-${id}`);
-            if (tab) {
-                const dot = tab.querySelector('.tab-status');
-                dot.className = `tab-status ${status}`;
+            const dot = getTabBtn(id)?.querySelector('.tab-status');
+            if (dot) dot.className = `tab-status ${status || ''}`.trim();
+        }
+
+        function closeTab(id) {
+            const queueItem = queue.find(f => f.id === id);
+            if (id === processingId || (queueItem && queueItem.status === 'processing')) {
+                showToast('No se puede cerrar mientras procesa');
+                return;
             }
+            const btn = getTabBtn(id);
+            const mode = btn?.dataset.tabMode || (queueItem ? 'queue' : 'single');
+            const wasActive = !!btn && btn.classList.contains('active');
+            const hadFocus = !!btn && btn.contains(document.activeElement);
+            let neighbour = null;
+            if (wasActive) {
+                const list = tabsOfMode(mode);
+                const idx = list.indexOf(btn);
+                neighbour = list[idx + 1] || list[idx - 1] || null;   // derecha, si no izquierda
+            }
+
+            if (queueItem) {
+                queue = queue.filter(f => f.id !== id);
+                idbDelete(id);
+            }
+            delete transcriptions[id];
+            delete segmentsStore[id];
+            delete editedTabs[id];
+            delete editingStates[id];
+            delete fileMetadata[id];
+            btn?.remove();
+            document.getElementById(`content-${id}`)?.remove();
+            if (activeTabByMode[mode] === id) activeTabByMode[mode] = null;
+            if (neighbour) switchTab(neighbour.dataset.id, hadFocus);
+
+            renderQueue();
+            updateTabsVisibility();
+            updateStartButton();
+            saveState();
+        }
+
+        tabsHeader.addEventListener('click', e => {
+            const closeBtn = e.target.closest('.tab-close');
+            const tab = e.target.closest('.tab-btn');
+            if (!tab) return;
+            if (closeBtn) {
+                e.stopPropagation();
+                closeTab(tab.dataset.id);
+                return;
+            }
+            switchTab(tab.dataset.id, true);
+        });
+
+        tabsContent.addEventListener('click', e => {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+            const id = btn.closest('.tab-content')?.dataset.id;
+            if (!id) return;
+            switch (btn.dataset.action) {
+                case 'edit': toggleEdit(id); break;
+                case 'save': saveEdit(id); break;
+                case 'copy': copyText(id); break;
+                case 'download': openDownloadFor(id); break;
+                case 'download-all': openDownloadAll(); break;
+            }
+        });
+
+        // --- Edición ---
+        function setEditing(id, on) {
+            const textEl = document.getElementById(`text-${id}`);
+            const contentEl = document.getElementById(`content-${id}`);
+            if (!textEl || !contentEl) return;
+            editingStates[id] = on;
+            textEl.contentEditable = on ? 'true' : 'false';
+            textEl.classList.toggle('editing', on);
+            contentEl.querySelector('[data-action="save"]').classList.toggle('visible', on);
+            const editBtn = contentEl.querySelector('[data-action="edit"]');
+            editBtn.classList.toggle('editing', on);
+            editBtn.setAttribute('aria-pressed', String(on));
+            editBtn.title = on ? 'Cancelar edición' : 'Editar';
+            if (on) textEl.focus();
         }
 
         function toggleEdit(id) {
+            if (id === processingId) { showToast('Espera a que termine la transcripción'); return; }
             const textEl = document.getElementById(`text-${id}`);
-            const contentEl = document.getElementById(`content-${id}`);
-            const isEditing = editingStates[id];
-
-            if (isEditing) {
-                editingStates[id] = false;
-                textEl.contentEditable = false;
-                textEl.classList.remove('editing');
-                contentEl.querySelector('.save-btn').classList.remove('visible');
-                contentEl.querySelector('.btn-action').classList.remove('editing');
+            if (!textEl) return;
+            if (editingStates[id]) {
+                setEditing(id, false);
+                textEl.textContent = transcriptions[id] || '';   // cancelar: descarta lo no guardado
             } else {
-                editingStates[id] = true;
-                textEl.contentEditable = true;
-                textEl.classList.add('editing');
-                textEl.focus();
-                contentEl.querySelector('.save-btn').classList.add('visible');
-                contentEl.querySelector('.btn-action').classList.add('editing');
+                setEditing(id, true);
             }
         }
 
         function saveEdit(id) {
-            editingStates[id] = false;
             const textEl = document.getElementById(`text-${id}`);
-            const contentEl = document.getElementById(`content-${id}`);
-            textEl.contentEditable = false;
-            textEl.classList.remove('editing');
-            contentEl.querySelector('.save-btn').classList.remove('visible');
-            contentEl.querySelector('.btn-action').classList.remove('editing');
-            transcriptions[id] = textEl.innerText;
+            if (!textEl) return;
+            const text = textEl.innerText;
+            const rendered = hasSegments(id) ? renderStore(id) : (transcriptions[id] || '');
+            if (text.replace(/\s+$/, '') === rendered.replace(/\s+$/, '')) {
+                delete editedTabs[id];
+                transcriptions[id] = rendered;
+            } else {
+                editedTabs[id] = true;
+                transcriptions[id] = text;
+            }
+            setEditing(id, false);
+            textEl.textContent = transcriptions[id];
             showToast('Guardado');
             saveState();
         }
 
-        function copyText(id) {
-            const text = document.getElementById(`text-${id}`)?.innerText || transcriptions[id];
-            navigator.clipboard.writeText(text);
-            showToast('Copiado');
+        // Texto para copiar/descargar: el del DOM mientras se edita, si no el texto guardado
+        function getTabText(id) {
+            const textEl = document.getElementById(`text-${id}`);
+            if (editingStates[id] && textEl) return textEl.innerText;
+            return transcriptions[id] || '';
         }
 
-        function downloadText(id, name) {
-            const text = document.getElementById(`text-${id}`)?.innerText || transcriptions[id];
-            const blob = new Blob([text], { type: 'text/plain' });
+        function legacyCopy(text) {
+            const active = document.activeElement;
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed';
+            ta.style.top = '-1000px';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            let ok = false;
+            try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+            ta.remove();
+            if (active && typeof active.focus === 'function') active.focus({ preventScroll: true });
+            return ok;
+        }
+
+        async function copyText(id) {
+            const text = getTabText(id);
+            if (!text.trim()) { showToast('Sin texto para copiar'); return; }
+            let ok = false;
+            if (navigator.clipboard && window.isSecureContext) {
+                try { await navigator.clipboard.writeText(text); ok = true; } catch (e) { ok = false; }
+            }
+            if (!ok) ok = legacyCopy(text);   // http://IP-de-la-red no es contexto seguro
+            showToast(ok ? 'Copiado' : 'No se pudo copiar');
+        }
+
+        // --- Descargas ---
+        let downloadIds = [];
+
+        function openDownloadFor(id) {
+            if (!getTabText(id).trim()) { showToast('Sin texto para descargar'); return; }
+            downloadIds = [id];
+            dlTitle.textContent = 'Descargar';
+            dlSubtitle.textContent = getTabName(id);
+            dlList.innerHTML = '';
+            dlList.hidden = true;
+            openModal(downloadModalOverlay);
+        }
+
+        function openDownloadAll() {
+            const ids = visibleTabs().map(b => b.dataset.id).filter(id => getTabText(id).trim());
+            if (!ids.length) { showToast('Sin texto para descargar'); return; }
+            downloadIds = ids;
+            dlTitle.textContent = 'Descargar todo';
+            dlSubtitle.textContent = ids.length === 1 ? '1 transcripción' : `${ids.length} transcripciones`;
+            dlList.innerHTML = ids.map(id => {
+                const name = escapeHtml(getTabName(id));
+                return `<li title="${name}">${name}</li>`;
+            }).join('');
+            dlList.hidden = false;
+            openModal(downloadModalOverlay);
+        }
+
+        function safeBaseName(name) {
+            const base = String(name || '')
+                .replace(/\.[^./\\]+$/, '')
+                .replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_')
+                .trim();
+            return base || 'audio';
+        }
+
+        function uniqueFileName(stem, ext, used) {
+            let n = 1;
+            let fileName = `${stem}.${ext}`;
+            while (used.has(fileName.toLowerCase())) {
+                n += 1;
+                fileName = `${stem} (${n}).${ext}`;
+            }
+            used.add(fileName.toLowerCase());
+            return fileName;
+        }
+
+        function triggerDownload(blob, fileName) {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = name.replace(/\.(mp3|mp4)$/i, '') + '_transcripcion.txt';
+            a.download = fileName;
+            a.rel = 'noopener';
+            a.style.display = 'none';
+            document.body.appendChild(a);
             a.click();
-            URL.revokeObjectURL(url);
-            showToast('Descargando');
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 10000);   // revocar en el acto puede cancelar la descarga
         }
 
-        function exportPDF(id, name) {
-            const text = document.getElementById(`text-${id}`)?.innerText || transcriptions[id] || '';
-            if (!text.trim()) { showToast('Sin texto para exportar'); return; }
+        function detectFormatName(text) {
+            if (/^Speaker \d+$/m.test(text)) return FORMAT_NAMES.speakers;
+            if (/^Vocero$/m.test(text)) return FORMAT_NAMES.classic;
+            return 'Texto';
+        }
 
+        function formatLabelFor(id, text) {
+            if (hasSegments(id) && !editedTabs[id] && !editingStates[id]) return FORMAT_NAMES[outputFormat];
+            const label = detectFormatName(text);
+            return editedTabs[id] ? `${label} (editado)` : label;
+        }
+
+        function downloadAs(fmt) {
+            const ids = downloadIds.slice();
+            closeModal(downloadModalOverlay);
+            if (fmt === 'pdf' && !(window.jspdf && window.jspdf.jsPDF)) {
+                showToast('No se pudo cargar el generador de PDF');
+                return;
+            }
+            // 1) Generar todos los blobs de forma síncrona
+            const used = new Set();
+            const files = [];
+            ids.forEach(id => {
+                const text = getTabText(id);
+                if (!text.trim()) return;
+                const name = getTabName(id);
+                try {
+                    const blob = fmt === 'pdf'
+                        ? buildPdfBlob(text, name, formatLabelFor(id, text))
+                        : new Blob([text], { type: 'text/plain;charset=utf-8' });
+                    files.push({ blob, fileName: uniqueFileName(`${safeBaseName(name)}_transcripcion`, fmt, used) });
+                } catch (e) {
+                    addLog('error', `No se pudo generar el ${fmt.toUpperCase()} de ${name}`);
+                }
+            });
+            if (!files.length) { showToast('Sin texto para descargar'); return; }
+            // 2) Lanzar todas las descargas de golpe (~80 ms entre cada una: Chromium descarta las del mismo tick)
+            files.forEach((f, i) => {
+                if (i === 0) triggerDownload(f.blob, f.fileName);
+                else setTimeout(() => triggerDownload(f.blob, f.fileName), i * 80);
+            });
+            if (files.length === 1) showToast('Descargando');
+            else showToast(`Descargando ${files.length} archivos · si el navegador lo pide, permite las descargas múltiples`, 5000);
+        }
+
+        downloadModalOverlay.querySelectorAll('[data-download-format]').forEach(btn => {
+            btn.addEventListener('click', () => downloadAs(btn.dataset.downloadFormat));
+        });
+
+        // --- PDF ---
+        const PDF_STYLES = {
+            num: { size: 8, style: 'normal', color: [140, 140, 140], lh: 4.2 },
+            speaker: { size: 10, style: 'bold', color: [30, 30, 30], lh: 5.2 },
+            time: { size: 9, style: 'normal', color: [120, 120, 120], lh: 4.8 },
+            body: { size: 10, style: 'normal', color: [50, 50, 50], lh: 5.2 }
+        };
+
+        function classifyPdfLine(line) {
+            const t = line.trim();
+            if (!t) return 'blank';
+            if (/^\d+$/.test(t) || /^S$/.test(t)) return 'num';
+            if (/^(Speaker \d+|Vocero)$/.test(t)) return 'speaker';
+            if (/^\d{2,}:\d{2} - \d{2,}:\d{2}$/.test(t)) return 'time';
+            return 'body';
+        }
+
+        function buildPdfBlob(text, name, formatLabel) {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+            const margin = 20;
+            const pageW = doc.internal.pageSize.getWidth();
+            const pageH = doc.internal.pageSize.getHeight();
+            const maxW = pageW - margin * 2;
+            const bottom = pageH - margin;
+            const base = String(name || 'audio').replace(/\.[^./\\]+$/, '') || 'audio';
+            const title = `${base} — Transcripción`;
+            let y = margin;
 
-            const marginLeft = 20;
-            const marginRight = 20;
-            const marginTop = 20;
-            const lineHeight = 6;
-            const pageWidth = doc.internal.pageSize.getWidth();
-            const pageHeight = doc.internal.pageSize.getHeight();
-            const maxWidth = pageWidth - marginLeft - marginRight;
-            let y = marginTop;
+            const applyStyle = st => {
+                doc.setFont('helvetica', st.style);
+                doc.setFontSize(st.size);
+                doc.setTextColor(st.color[0], st.color[1], st.color[2]);
+            };
+            const newPage = () => { doc.addPage(); y = margin; };
+
+            doc.setProperties({ title });
 
             // Título
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(14);
             doc.setTextColor(30, 30, 30);
-            const title = name.replace(/\.(mp3|mp4)$/i, '') + ' — Transcripción';
-            doc.text(title, marginLeft, y);
-            y += 8;
+            doc.splitTextToSize(title, maxW).forEach(line => {
+                doc.text(line, margin, y, { baseline: 'top' });
+                y += 6.5;
+            });
 
-            // Línea separadora
-            doc.setDrawColor(180, 180, 180);
-            doc.line(marginLeft, y, pageWidth - marginRight, y);
+            // Subtítulo: formato y fecha
+            const fecha = new Date().toLocaleDateString('es-PE', { day: '2-digit', month: 'long', year: 'numeric' });
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(9);
+            doc.setTextColor(130, 130, 130);
+            doc.text(`Formato: ${formatLabel || detectFormatName(text)} · ${fecha}`, margin, y + 0.5, { baseline: 'top' });
             y += 7;
 
-            // Cuerpo del texto
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(10);
-            doc.setTextColor(50, 50, 50);
+            // Separador
+            doc.setDrawColor(190, 190, 190);
+            doc.setLineWidth(0.3);
+            doc.line(margin, y, pageW - margin, y);
+            y += 6;
 
-            const lines = text.split('\n');
-            for (const rawLine of lines) {
-                const wrapped = doc.splitTextToSize(rawLine === '' ? ' ' : rawLine, maxWidth);
-                for (const wline of wrapped) {
-                    if (y + lineHeight > pageHeight - 15) {
-                        doc.addPage();
-                        y = marginTop;
+            // Cuerpo
+            const lines = String(text).replace(/\r\n?/g, '\n').split('\n');
+            const kinds = lines.map(classifyPdfLine);
+            const isHeader = k => k === 'num' || k === 'speaker' || k === 'time';
+
+            for (let i = 0; i < lines.length; i++) {
+                const kind = kinds[i];
+                if (kind === 'blank') {
+                    if (y > margin) y += 3.2;
+                    continue;
+                }
+                if (isHeader(kind)) {
+                    // Mantener la cabecera del párrafo junto a su primera línea de texto
+                    if (i === 0 || !isHeader(kinds[i - 1])) {
+                        let need = 0;
+                        let j = i;
+                        while (j < lines.length && isHeader(kinds[j])) { need += PDF_STYLES[kinds[j]].lh; j++; }
+                        if (j < lines.length && kinds[j] === 'body') need += PDF_STYLES.body.lh;
+                        if (y + need > bottom && y > margin) newPage();
                     }
-                    doc.text(wline, marginLeft, y);
-                    y += lineHeight;
+                    const st = PDF_STYLES[kind];
+                    if (y + st.lh > bottom) newPage();
+                    applyStyle(st);
+                    doc.text(lines[i].trim(), margin, y, { baseline: 'top' });
+                    y += st.lh;
+                    continue;
                 }
-            }
-
-            doc.save(name.replace(/\.(mp3|mp4)$/i, '') + '_transcripcion.pdf');
-            showToast('PDF descargado');
-        }
-
-        async function uploadAndProcess(fileData, fileId) {
-            const formData = new FormData();
-            formData.append('archivo', fileData);
-
-            try {
-                const res = await fetch('/upload', { method: 'POST', body: formData });
-                const data = await res.json();
-                if (data.error) {
-                    addLog('error', data.error);
-                    return false;
-                }
-                socket.emit('transcribir', { filename: data.filename, fileId });
-                return true;
-            } catch (err) {
-                addLog('error', 'Error al subir');
-                return false;
-            }
-        }
-
-        async function processQueue() {
-            isProcessing = true;
-            wasRestoredFromSave = false;
-            updateStartButton();
-            progressMini.classList.add('visible');
-
-            for (let i = 0; i < queue.length; i++) {
-                const item = queue[i];
-                if (item.status !== 'pending') continue;
-
-                currentIndex = i;
-                item.status = 'processing';
-                idbDelete(item.id);
-                renderQueue();
-                updateTabStatus(item.id, 'processing');
-                switchTab(item.id);
-
-                progressLabel.textContent = `${item.name}`;
-                progressFill.style.width = '0%';
-                progressPercent.textContent = '0%';
-
-                addLog('info', `Subiendo: ${item.name}`);
-
-                const success = await uploadAndProcess(item.file, item.id);
-                if (!success) {
-                    item.status = 'error';
-                    updateTabStatus(item.id, 'error');
-                }
-
-                await new Promise(resolve => {
-                    const handler = (data) => {
-                        if (data.fileId === item.id) {
-                            socket.off('archivo_completado', handler);
-                            socket.off('archivo_error', errorHandler);
-                            resolve();
-                        }
-                    };
-                    const errorHandler = (data) => {
-                        if (data.fileId === item.id) {
-                            socket.off('archivo_completado', handler);
-                            socket.off('archivo_error', errorHandler);
-                            resolve();
-                        }
-                    };
-                    socket.on('archivo_completado', handler);
-                    socket.on('archivo_error', errorHandler);
-                });
-
-                renderQueue();
-            }
-
-            isProcessing = false;
-            currentIndex = -1;
-            updateStartButton();
-            progressMini.classList.remove('visible');
-            showToast('Cola completada');
-        }
-
-        async function processSingle() {
-            if (!singleFileData) return;
-
-            isProcessing = true;
-            singleFileRestored = false;
-            idbDelete('single');
-            updateStartButton();
-            progressMini.classList.add('visible');
-            progressLabel.textContent = singleFileData.name;
-            progressFill.style.width = '0%';
-            progressPercent.textContent = '0%';
-
-            const id = generateId();
-            transcriptions[id] = '';
-            createTab(id, singleFileData.name);
-            switchTab(id);
-
-            addLog('info', `Subiendo: ${singleFileData.name}`);
-
-            const success = await uploadAndProcess(singleFileData, id);
-
-            if (success) {
-                await new Promise(resolve => {
-                    const handler = (data) => {
-                        if (data.fileId === id) {
-                            socket.off('archivo_completado', handler);
-                            socket.off('archivo_error', errorHandler);
-                            resolve();
-                        }
-                    };
-                    const errorHandler = (data) => {
-                        if (data.fileId === id) {
-                            socket.off('archivo_completado', handler);
-                            socket.off('archivo_error', errorHandler);
-                            resolve();
-                        }
-                    };
-                    socket.on('archivo_completado', handler);
-                    socket.on('archivo_error', errorHandler);
+                applyStyle(PDF_STYLES.body);
+                doc.splitTextToSize(lines[i], maxW).forEach(wline => {
+                    if (y + PDF_STYLES.body.lh > bottom) {
+                        newPage();
+                        applyStyle(PDF_STYLES.body);
+                    }
+                    doc.text(wline, margin, y, { baseline: 'top' });
+                    y += PDF_STYLES.body.lh;
                 });
             }
 
-            isProcessing = false;
-            singleFile.classList.remove('visible');
-            singleFileData = null;
-            updateStartButton();
-            progressMini.classList.remove('visible');
+            // Pie de página
+            const total = doc.getNumberOfPages();
+            for (let p = 1; p <= total; p++) {
+                doc.setPage(p);
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text(`Página ${p} de ${total}`, pageW / 2, pageH - 10, { align: 'center' });
+            }
+            return doc.output('blob');
         }
 
-        function closeTab(id) {
-            const queueItem = queue.find(f => f.id === id);
-            if (queueItem) {
-                if (queueItem.status === 'processing') { showToast('No se puede borrar mientras procesa'); return; }
-                queue = queue.filter(f => f.id !== id);
-                idbDelete(id);
-                renderQueue();
-                updateStartButton();
+        // --- Modal de formato de salida ---
+        const SAMPLE_SEGMENTS = [
+            { start: 0.0, end: 4.6, text: 'Buenos días. Siendo las nueve y treinta de la mañana, se da inicio a la audiencia de prisión preventiva.' },
+            { start: 4.6, end: 9.4, text: 'Se solicita a las partes acreditarse para el registro.' },
+            { start: 10.2, end: 16.1, text: 'Buenos días, señor juez. Fiscal provincial de la Segunda Fiscalía Penal, con domicilio procesal en el Ministerio Público.' },
+            { start: 16.7, end: 22.3, text: 'Buenos días. Abogado defensor del investigado, con casilla electrónica registrada.' },
+            { start: 23.0, end: 29.5, text: 'Gracias. Tiene la palabra el Ministerio Público para sustentar su requerimiento.' },
+            { start: 30.2, end: 38.6, text: 'Señor juez, el investigado fue intervenido en flagrancia por personal de la PNP, conforme al acta de intervención.' },
+            { start: 38.6, end: 45.8, text: 'Existen fundados y graves elementos de convicción que lo vinculan con el hecho.' },
+            { start: 46.7, end: 52.9, text: 'Objeción, señor juez. El acta no fue firmada por mi patrocinado.' },
+            { start: 53.6, end: 58.1, text: 'Se toma nota. Continúe, señor fiscal.' }
+        ];
+        const SAMPLE_LABELS = [0, 0, 1, 2, 0, 1, 1, 2, 0];
+
+        let fmtDraft = { format: 'speakers', speakers: 'auto' };
+        let previewTimer = null;
+
+        function buildPreviewHtml(format) {
+            const text = renderSegments({ segs: SAMPLE_SEGMENTS, labels: SAMPLE_LABELS }, format);
+            return text.replace(/\s+$/, '').split('\n').map(line => {
+                const t = line.trim();
+                const safe = escapeHtml(line);
+                const m = /^Speaker (\d+)$/.exec(t);
+                if (m) return `<span class="pv-spk pv-spk-${(Number(m[1]) - 1) % 6}">${safe}</span>`;
+                if (/^\d+$/.test(t) || t === 'S') return `<span class="pv-num">${safe}</span>`;
+                if (t === 'Vocero') return `<span class="pv-voc">${safe}</span>`;
+                if (/^\d{2,}:\d{2} - \d{2,}:\d{2}$/.test(t)) return `<span class="pv-time">${safe}</span>`;
+                return safe;
+            }).join('\n');
+        }
+
+        function syncFormatModal(animate) {
+            fmtOptionEls.forEach(el => {
+                const on = el.dataset.format === fmtDraft.format;
+                el.setAttribute('aria-checked', String(on));
+                el.tabIndex = on ? 0 : -1;
+            });
+            fmtSpeakerEls.forEach(el => {
+                const on = String(fmtDraft.speakers) === el.dataset.speakers;
+                el.setAttribute('aria-checked', String(on));
+                el.tabIndex = on ? 0 : -1;
+            });
+            fmtSpeakers.hidden = fmtDraft.format !== 'speakers';
+            fmtCaption.textContent = fmtDraft.format === 'classic'
+                ? 'Bloques de 30 s'
+                : (fmtDraft.speakers === 'auto' ? 'Hablantes: detección automática' : `Hablantes: ${fmtDraft.speakers}`);
+
+            if (fmtPreview.dataset.format === fmtDraft.format) return;
+            fmtPreview.dataset.format = fmtDraft.format;
+            const html = buildPreviewHtml(fmtDraft.format);
+            clearTimeout(previewTimer);
+            if (!animate) {
+                fmtPreview.classList.remove('fading');
+                fmtPreview.innerHTML = html;
+                fmtPreview.scrollTop = 0;
+                return;
             }
-            delete transcriptions[id];
-            delete fileMetadata[id];
-            delete editingStates[id];
-            document.getElementById(`tab-${id}`)?.remove();
-            document.getElementById(`content-${id}`)?.remove();
-            updateTabsVisibility();
-            const currentMode = isQueueMode ? 'queue' : 'single';
-            const visibleTabs = [...tabsHeader.children].filter(b => b.dataset.tabMode === currentMode);
-            if (visibleTabs.length > 0 && !document.querySelector('.tab-btn.active')) {
-                switchTab(visibleTabs[0].id.replace('tab-', ''));
+            fmtPreview.classList.add('fading');
+            previewTimer = setTimeout(() => {
+                fmtPreview.innerHTML = html;
+                fmtPreview.scrollTop = 0;
+                fmtPreview.classList.remove('fading');
+            }, 140);
+        }
+
+        function openFormatModal() {
+            fmtDraft = { format: outputFormat, speakers: numSpeakers };
+            syncFormatModal(false);
+            openModal(formatModalOverlay, fmtOptionEls.find(el => el.dataset.format === fmtDraft.format));
+        }
+
+        function applyFormat() {
+            const formatChanged = fmtDraft.format !== outputFormat;
+            outputFormat = fmtDraft.format === 'classic' ? 'classic' : 'speakers';
+            numSpeakers = normalizeSpeakers(fmtDraft.speakers);
+            closeModal(formatModalOverlay);
+            updateFormatRow();
+
+            let skipped = 0;
+            Object.keys(segmentsStore).forEach(id => {
+                const textEl = document.getElementById(`text-${id}`);
+                if (!textEl || !hasSegments(id)) return;
+                if (editedTabs[id]) { skipped++; return; }
+                transcriptions[id] = renderStore(id);
+                if (!editingStates[id]) textEl.textContent = transcriptions[id];
+            });
+
+            let msg = `Formato aplicado: ${FORMAT_NAMES[outputFormat]}`;
+            if (skipped && formatChanged) {
+                msg += skipped === 1
+                    ? ' · 1 transcripción editada conserva su texto'
+                    : ` · ${skipped} transcripciones editadas conservan su texto`;
             }
+            showToast(msg, skipped && formatChanged ? 4500 : 2500);
             saveState();
         }
 
+        // Grupo de radios accesible: clic, flechas, Inicio/Fin, Espacio/Enter
+        function setupRadioGroup(items, onSelect) {
+            items.forEach((el, i) => {
+                el.addEventListener('click', () => onSelect(el));
+                el.addEventListener('keydown', e => {
+                    let next = null;
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (i + 1) % items.length;
+                    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (i - 1 + items.length) % items.length;
+                    else if (e.key === 'Home') next = 0;
+                    else if (e.key === 'End') next = items.length - 1;
+                    else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); onSelect(el); return; }
+                    if (next === null) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onSelect(items[next]);
+                    items[next].focus();
+                });
+            });
+        }
+
+        setupRadioGroup(fmtOptionEls, el => {
+            fmtDraft.format = el.dataset.format === 'classic' ? 'classic' : 'speakers';
+            syncFormatModal(true);
+        });
+
+        setupRadioGroup(fmtSpeakerEls, el => {
+            fmtDraft.speakers = normalizeSpeakers(el.dataset.speakers);
+            syncFormatModal(true);
+        });
+
+        btnFormat.addEventListener('click', openFormatModal);
+        fmtAccept.addEventListener('click', applyFormat);
+
+        // --- Procesamiento ---
+        function setProgress(pct) {
+            const v = Math.max(0, Math.min(100, Math.round(Number(pct) || 0)));
+            progressFill.style.width = v + '%';
+            progressPercent.textContent = v + '%';
+            progressTrack.setAttribute('aria-valuenow', String(v));
+        }
+
+        function markFileStatus(id, status) {
+            const item = queue.find(f => f.id === id);
+            if (item) {
+                item.status = status;
+                renderQueue();
+            }
+            updateTabStatus(id, status);
+        }
+
+        function waitForFile(id) {
+            return new Promise(resolve => { pendingWait = { id, resolve }; });
+        }
+
+        function resolveWait(id, outcome) {
+            if (pendingWait && pendingWait.id === id) {
+                const { resolve } = pendingWait;
+                pendingWait = null;
+                resolve(outcome);
+            }
+        }
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('archivo', file);
+            try {
+                const res = await fetch('/upload', { method: 'POST', body: formData });
+                let data = null;
+                try { data = await res.json(); } catch (e) { data = null; }
+                if (!res.ok || !data || data.error || !data.filename) {
+                    addLog('error', (data && data.error) || `Error al subir (${res.status})`);
+                    return null;
+                }
+                return data.filename;
+            } catch (err) {
+                addLog('error', 'Error al subir');
+                return null;
+            }
+        }
+
+        // Sube y transcribe un archivo. Devuelve 'completed' | 'error' | 'upload_error' | 'disconnected'
+        async function runJob(id, file) {
+            processingId = id;
+            abortedJob = null;
+            segmentsStore[id] = { segs: [], labels: null };
+            transcriptions[id] = '';
+            delete editedTabs[id];
+            if (editingStates[id]) setEditing(id, false);
+            const textEl = document.getElementById(`text-${id}`);
+            if (textEl) textEl.textContent = '';
+
+            const filename = await uploadFile(file);
+            if (abortedJob === id) return 'disconnected';
+            if (!filename) return 'upload_error';
+            const done = waitForFile(id);
+            socket.emit('transcribir', {
+                filename,
+                fileId: id,
+                numSpeakers: numSpeakers === 'auto' ? null : Number(numSpeakers)
+            });
+            return await done;
+        }
+
+        function startProcessingUi(label) {
+            isProcessing = true;
+            updateStartButton();
+            progressMini.classList.add('visible');
+            progressLabel.textContent = label;
+            progressLabel.title = label;
+            setProgress(0);
+        }
+
+        function endProcessingUi() {
+            isProcessing = false;
+            processingId = null;
+            pendingWait = null;
+            progressMini.classList.remove('visible');
+            updateStartButton();
+        }
+
+        async function processQueue() {
+            if (isProcessing || !queue.some(f => f.status === 'pending')) return;
+            startProcessingUi('Procesando...');
+            let stopped = false;
+
+            for (;;) {
+                const item = queue.find(f => f.status === 'pending');
+                if (!item) break;
+                if (!item.file) { markFileStatus(item.id, 'error'); continue; }
+
+                item.status = 'processing';
+                item.restored = false;
+                idbDelete(item.id);
+                renderQueue();
+                updateTabStatus(item.id, 'processing');
+                showProcessingTab(item.id);
+                updateStartButton();
+
+                progressLabel.textContent = item.name;
+                progressLabel.title = item.name;
+                setProgress(0);
+                addLog('info', `Subiendo: ${item.name}`);
+
+                const outcome = await runJob(item.id, item.file);
+                item.file = null;
+                if (outcome === 'upload_error') markFileStatus(item.id, 'error');
+                saveState();
+                if (outcome === 'disconnected') { stopped = true; break; }
+            }
+
+            endProcessingUi();
+            saveState();
+            if (!stopped) showToast('Cola completada');
+        }
+
+        async function processSingle() {
+            if (isProcessing || !singleFileData) return;
+            const file = singleFileData;
+            singleFileRestored = false;
+            idbDelete('single');
+            startProcessingUi(file.name);
+
+            const id = generateId();
+            fileMetadata[id] = { ...(fileMetadata['single'] || { name: file.name, size: file.size, type: file.type || 'audio/mpeg', lastModified: file.lastModified, duration: null }) };
+            createTab(id, file.name, 'single');
+            updateTabStatus(id, 'processing');
+            showProcessingTab(id);
+            addLog('info', `Subiendo: ${file.name}`);
+
+            const outcome = await runJob(id, file);
+            if (outcome === 'upload_error') updateTabStatus(id, 'error');
+
+            if (singleFileData === file) {   // si eligieron otro archivo mientras tanto, se conserva
+                singleFileData = null;
+                delete fileMetadata['single'];
+            }
+            endProcessingUi();
+            renderSingleFile();
+            saveState();
+        }
+
+        // --- Eventos de interfaz ---
         async function clearAll() {
             if (isProcessing) { showToast('Espera a que termine el procesamiento'); return; }
             if (!confirm('¿Borrar todas las transcripciones y archivos guardados?')) return;
 
             queue = [];
             transcriptions = {};
+            segmentsStore = {};
+            editedTabs = {};
             fileMetadata = {};
             editingStates = {};
-            wasRestoredFromSave = false;
+            activeTabByMode = { single: null, queue: null };
             singleFileData = null;
             singleFileRestored = false;
+            clearTimeout(saveStateTimer);
+            saveStateTimer = null;
 
-            singleFile.classList.remove('visible');
             tabsHeader.innerHTML = '';
             tabsContent.innerHTML = '';
-            tabsContainer.classList.remove('visible');
-
+            renderSingleFile();
             renderQueue();
+            updateTabsVisibility();
             updateStartButton();
-            localStorage.removeItem('transcriptorState');
 
-            try {
-                const db = await _idbReady;
-                await new Promise((res, rej) => {
-                    const tx = db.transaction('files', 'readwrite');
-                    tx.objectStore('files').clear();
-                    tx.oncomplete = res;
-                    tx.onerror = () => rej(tx.error);
-                });
-            } catch (e) {}
-
+            try { localStorage.removeItem(LEGACY_STATE_KEY); } catch (e) { }
+            await Promise.all([idbClear('files'), idbDelete('app', 'state')]);
             showToast('Todo borrado');
         }
 
-        modeSingle.onclick = () => setMode(false);
-        modeQueue.onclick = () => setMode(true);
-
-        dropzone.onclick = () => fileInput.click();
-        dropzone.ondragover = e => { e.preventDefault(); dropzone.classList.add('active'); };
-        dropzone.ondragleave = () => dropzone.classList.remove('active');
-        dropzone.ondrop = e => {
-            e.preventDefault();
-            dropzone.classList.remove('active');
-            const files = Array.from(e.dataTransfer.files);
-            if (isQueueMode) {
-                files.forEach(f => addToQueue(f));
-            } else if (files[0]) {
-                handleSingleFile(files[0]);
-            }
-        };
-
-        fileInput.onchange = () => {
-            const files = Array.from(fileInput.files);
-            if (isQueueMode) {
-                files.forEach(f => addToQueue(f));
-            } else if (files[0]) {
-                handleSingleFile(files[0]);
-            }
-            fileInput.value = '';
-        };
+        function handleFiles(files) {
+            if (isQueueMode) files.forEach(f => addToQueue(f));
+            else if (files[0]) handleSingleFile(files[0]);
+        }
 
         function handleSingleFile(file) {
-            if (file.size > 2 * 1024 * 1024 * 1024) {
+            if (file.size > MAX_FILE_BYTES) {
                 addLog('error', 'Archivo excede 2GB');
                 return;
             }
@@ -1957,76 +3416,181 @@
             singleFileData = file;
             singleFileRestored = false;
             fileMetadata['single'] = { name: file.name, size: file.size, type: file.type || 'audio/mpeg', lastModified: file.lastModified, duration: null };
-            singleFileName.textContent = file.name;
-            singleFileSize.textContent = formatBytes(file.size);
-            singleFile.classList.add('visible');
+            renderSingleFile();
             idbPut('single', file);
             updateStartButton();
-            getAudioDuration(file).then(dur => { fileMetadata['single'].duration = dur; });
+            getAudioDuration(file).then(dur => {
+                if (singleFileData === file && fileMetadata['single']) fileMetadata['single'].duration = dur;
+            });
+            saveState();
         }
 
-        singleFileRemove.onclick = () => {
+        modeSingle.addEventListener('click', () => setMode(false));
+        modeQueue.addEventListener('click', () => setMode(true));
+        btnClearAll.addEventListener('click', clearAll);
+
+        dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+        });
+        dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('active'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('active'));
+        dropzone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropzone.classList.remove('active');
+            handleFiles(Array.from(e.dataTransfer.files));
+        });
+
+        fileInput.addEventListener('change', () => {
+            handleFiles(Array.from(fileInput.files));
+            fileInput.value = '';
+        });
+
+        singleFileRemove.addEventListener('click', () => {
             singleFileData = null;
             singleFileRestored = false;
             delete fileMetadata['single'];
-            singleFile.classList.remove('visible');
+            renderSingleFile();
             idbDelete('single');
             updateStartButton();
             saveState();
-        };
-
-        btnStart.onclick = () => {
-            if (isQueueMode) {
-                processQueue();
-            } else {
-                processSingle();
-            }
-        };
-
-        document.getElementById('singleFileInfo').onclick = () => openInfoModal('single');
-
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeInfoModal(); });
-
-        socket.on('dev_reload', () => setTimeout(() => window.location.reload(), 150));
-
-        socket.on('log', data => addLog(data.tipo, data.mensaje));
-
-        socket.on('archivo_progreso', data => {
-            progressFill.style.width = data.porcentaje + '%';
-            progressPercent.textContent = data.porcentaje + '%';
         });
 
-        socket.on('transcripcion_parcial', data => {
-            const textEl = document.getElementById(`text-${data.fileId}`);
-            if (textEl) {
-                transcriptions[data.fileId] += data.texto;
-                textEl.textContent = transcriptions[data.fileId];
-                textEl.scrollTop = textEl.scrollHeight;
-                debouncedSaveState();
+        btnStart.addEventListener('click', () => {
+            if (isQueueMode) processQueue();
+            else processSingle();
+        });
+
+        document.getElementById('singleFileInfo').addEventListener('click', () => openInfoModal('single'));
+
+        // Teclado global: modales (Escape / Tab) y navegación entre pestañas con flechas
+        document.addEventListener('keydown', e => {
+            if (modalStack.length) {
+                if (e.key === 'Escape') { e.preventDefault(); closeTopModal(); }
+                else if (e.key === 'Tab') trapFocus(e);
+                return;
             }
+            if (e.defaultPrevented || e.isComposing) return;
+            if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+            const t = e.target;
+            if (t && (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName))) return;
+
+            const inTablist = tabsHeader.contains(document.activeElement);
+            if (e.key === 'Delete' && inTablist && document.activeElement.classList.contains('tab-btn')) {
+                e.preventDefault();
+                closeTab(document.activeElement.dataset.id);
+                return;
+            }
+
+            const tabs = visibleTabs();
+            if (tabs.length < 2) return;
+            const idx = tabs.findIndex(b => b.classList.contains('active'));
+            let next;
+            switch (e.key) {
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    next = idx <= 0 ? tabs.length - 1 : idx - 1;
+                    break;
+                case 'ArrowRight':
+                case 'ArrowDown':
+                    next = idx === -1 || idx >= tabs.length - 1 ? 0 : idx + 1;
+                    break;
+                case 'Home':
+                    if (!inTablist) return;
+                    next = 0;
+                    break;
+                case 'End':
+                    if (!inTablist) return;
+                    next = tabs.length - 1;
+                    break;
+                default:
+                    return;
+            }
+            e.preventDefault();
+            switchTab(tabs[next].dataset.id, true);
+        });
+
+        window.addEventListener('pagehide', flushSave);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') flushSave();
+        });
+
+        // --- Socket.IO ---
+        socket.on('dev_reload', () => {
+            flushSave();
+            setTimeout(() => window.location.reload(), 150);
+        });
+
+        socket.on('log', data => addLog(data && data.tipo, data && data.mensaje));
+
+        socket.on('archivo_progreso', data => {
+            if (!data || (processingId && data.fileId && data.fileId !== processingId)) return;
+            setProgress(data.porcentaje);
+        });
+
+        socket.on('transcripcion_segmentos', data => {
+            if (!data || !data.fileId) return;
+            const id = data.fileId;
+            const textEl = document.getElementById(`text-${id}`);
+            if (!textEl) return;
+            const st = segmentsStore[id] || (segmentsStore[id] = { segs: [], labels: null });
+            if (Array.isArray(data.segmentos)) {
+                data.segmentos.forEach(s => {
+                    if (!s || typeof s.text !== 'string') return;
+                    if (Number.isInteger(s.id) && st.segs[s.id] && st.segs[s.id].id === s.id) return;   // duplicado
+                    st.segs.push({ id: s.id, start: Number(s.start) || 0, end: Number(s.end) || 0, text: s.text });
+                });
+            }
+            if (Array.isArray(data.hablantes)) st.labels = data.hablantes.slice();   // puede reetiquetar todo
+            if (!editedTabs[id]) {
+                transcriptions[id] = renderStore(id);
+                if (!editingStates[id]) {
+                    const nearBottom = textEl.scrollHeight - textEl.scrollTop - textEl.clientHeight < 48;
+                    textEl.textContent = transcriptions[id];
+                    if (nearBottom) textEl.scrollTop = textEl.scrollHeight;
+                }
+            }
+            debouncedSaveState();
         });
 
         socket.on('archivo_completado', data => {
-            const item = queue.find(f => f.id === data.fileId);
-            if (item) {
-                item.status = 'completed';
-                renderQueue();
-            }
-            updateTabStatus(data.fileId, 'completed');
+            const id = data && data.fileId;
+            if (!id || id === abortedJob) return;
+            markFileStatus(id, 'completed');
             showToast('Transcripción completada');
+            resolveWait(id, 'completed');
             saveState();
         });
 
         socket.on('archivo_error', data => {
-            const item = queue.find(f => f.id === data.fileId);
-            if (item) {
-                item.status = 'error';
-                renderQueue();
-            }
-            updateTabStatus(data.fileId, 'error');
+            const id = data && data.fileId;
+            if (!id || id === abortedJob) return;
+            markFileStatus(id, 'error');
+            resolveWait(id, 'error');
             saveState();
         });
-        restoreState(); // async, no need to await — UI updates internally
+
+        let lostDuringJob = false;
+
+        socket.on('disconnect', () => {
+            if (!isProcessing || !processingId) return;
+            const id = processingId;
+            abortedJob = id;
+            lostDuringJob = true;
+            addLog('error', 'Conexión perdida con el servidor');
+            markFileStatus(id, 'error');
+            resolveWait(id, 'disconnected');
+            saveState();
+        });
+
+        socket.on('connect', () => {
+            if (!lostDuringJob) return;
+            lostDuringJob = false;
+            addLog('info', 'Conexión restablecida');
+        });
+
+        updateFormatRow();
+        restoreState(); // async: la interfaz se actualiza dentro
     </script>
 </body>
 
