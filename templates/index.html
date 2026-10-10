@@ -397,13 +397,12 @@
         }
 
         .format-row-value {
-            flex: 1;
+            flex: 1 1 auto;
             min-width: 0;
             font-size: 12px;
             color: #ccc;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            overflow-wrap: anywhere;
         }
 
         .format-row-btn {
@@ -1646,6 +1645,7 @@
 
             .segmented button {
                 min-width: 38px;
+                min-height: 36px;
                 padding: 6px 8px;
             }
 
@@ -1660,6 +1660,13 @@
             .tab-btn .tab-close {
                 width: 22px;
                 height: 22px;
+                position: relative;
+            }
+
+            .tab-btn .tab-close::before {
+                content: '';
+                position: absolute;
+                inset: -7px;   /* 22 + 14 = 36 px de área táctil sin agrandar la pestaña */
             }
 
             .tab-btn.active .tab-close {
@@ -1963,6 +1970,7 @@
         let processingId = null;          // id de la pestaña que se está transcribiendo
         let pendingWait = null;           // { id, resolve } espera de archivo_completado / archivo_error
         let abortedJob = null;            // id del trabajo cortado por desconexión
+        let uploadController = null;      // permite cancelar la subida en curso si se cae la conexión
         let transcriptions = {};          // id -> texto mostrado / copiado / descargado
         let segmentsStore = {};           // id -> { segs: [{id,start,end,text}], labels: number[] | null }
         let editedTabs = {};              // id -> true si el usuario guardó una edición manual distinta
@@ -2414,7 +2422,10 @@
                 if (hasSegments(tab.id) && !editedTabs[tab.id]) transcriptions[tab.id] = renderStore(tab.id);
                 const textEl = document.getElementById(`text-${tab.id}`);
                 if (textEl) textEl.textContent = transcriptions[tab.id] || '';
-                if (wasProcessing) addLog('warning', `Transcripción interrumpida: ${name}`);
+                if (wasProcessing) {
+                    addLog('warning', `Transcripción interrumpida: ${name}`);
+                    dirtyBeforeReady = true;   // guardar el estado ya normalizado para no repetir el aviso
+                }
             });
 
             // Limpieza de datos huérfanos (pestañas que ya no existen)
@@ -2440,6 +2451,7 @@
                             updateTabStatus(item.id, 'error');
                         }
                     } else {
+                        if (item.status === 'processing') dirtyBeforeReady = true;
                         queue.push({ id: item.id, name: item.name, size: item.size, status: item.status === 'processing' ? 'error' : item.status });
                     }
                 });
@@ -2679,7 +2691,7 @@
                             <span class="result-filename-text" title="${safeName}">${safeName}</span>
                         </div>
                         <div class="result-actions">
-                            <button type="button" class="btn-action" data-action="edit" aria-pressed="false" title="Editar">${ICON.edit}Editar</button>
+                            <button type="button" class="btn-action" data-action="edit" aria-pressed="false" title="Editar">${ICON.edit}<span class="btn-label">Editar</span></button>
                             <button type="button" class="btn-action save-btn" data-action="save">${ICON.save}Guardar</button>
                             <button type="button" class="btn-action" data-action="copy">${ICON.copy}Copiar</button>
                             <button type="button" class="btn-action" data-action="download" aria-haspopup="dialog">${ICON.download}Descargar</button>
@@ -2815,6 +2827,8 @@
             editBtn.classList.toggle('editing', on);
             editBtn.setAttribute('aria-pressed', String(on));
             editBtn.title = on ? 'Cancelar edición' : 'Editar';
+            const label = editBtn.querySelector('.btn-label');
+            if (label) label.textContent = on ? 'Cancelar' : 'Editar';
             if (on) textEl.focus();
         }
 
@@ -2823,6 +2837,8 @@
             const textEl = document.getElementById(`text-${id}`);
             if (!textEl) return;
             if (editingStates[id]) {
+                const dirty = textEl.innerText.replace(/\s+$/, '') !== (transcriptions[id] || '').replace(/\s+$/, '');
+                if (dirty && !confirm('¿Descartar los cambios sin guardar?')) return;
                 setEditing(id, false);
                 textEl.textContent = transcriptions[id] || '';   // cancelar: descarta lo no guardado
             } else {
@@ -2851,7 +2867,17 @@
         // Texto para copiar/descargar: el del DOM mientras se edita, si no el texto guardado
         function getTabText(id) {
             const textEl = document.getElementById(`text-${id}`);
-            if (editingStates[id] && textEl) return textEl.innerText;
+            if (editingStates[id] && textEl) {
+                if (textEl.getClientRects().length) return textEl.innerText;
+                // innerText de un elemento oculto (pestaña inactiva) pierde los saltos de línea de los <div>
+                const clone = textEl.cloneNode(true);
+                clone.removeAttribute('id');
+                clone.style.cssText = 'position:fixed;left:-99999px;top:0;width:800px;max-height:none;';
+                document.body.appendChild(clone);
+                const text = clone.innerText;
+                clone.remove();
+                return text;
+            }
             return transcriptions[id] || '';
         }
 
@@ -3184,8 +3210,10 @@
                 const textEl = document.getElementById(`text-${id}`);
                 if (!textEl || !hasSegments(id)) return;
                 if (editedTabs[id]) { skipped++; return; }
+                const prev = transcriptions[id] || '';
                 transcriptions[id] = renderStore(id);
-                if (!editingStates[id]) textEl.textContent = transcriptions[id];
+                // En modo edición solo se refresca si el usuario aún no tocó el texto
+                if (!editingStates[id] || textEl.textContent === prev) textEl.textContent = transcriptions[id];
             });
 
             let msg = `Formato aplicado: ${FORMAT_NAMES[outputFormat]}`;
@@ -3263,8 +3291,9 @@
         async function uploadFile(file) {
             const formData = new FormData();
             formData.append('archivo', file);
+            uploadController = new AbortController();
             try {
-                const res = await fetch('/upload', { method: 'POST', body: formData });
+                const res = await fetch('/upload', { method: 'POST', body: formData, signal: uploadController.signal });
                 let data = null;
                 try { data = await res.json(); } catch (e) { data = null; }
                 if (!res.ok || !data || data.error || !data.filename) {
@@ -3273,8 +3302,11 @@
                 }
                 return data.filename;
             } catch (err) {
+                if (err && err.name === 'AbortError') return null;   // cortado por desconexión
                 addLog('error', 'Error al subir');
                 return null;
+            } finally {
+                uploadController = null;
             }
         }
 
@@ -3485,11 +3517,6 @@
             if (t && (t.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName))) return;
 
             const inTablist = tabsHeader.contains(document.activeElement);
-            if (e.key === 'Delete' && inTablist && document.activeElement.classList.contains('tab-btn')) {
-                e.preventDefault();
-                closeTab(document.activeElement.dataset.id);
-                return;
-            }
 
             const tabs = visibleTabs();
             if (tabs.length < 2) return;
@@ -3526,6 +3553,8 @@
 
         // --- Socket.IO ---
         socket.on('dev_reload', () => {
+            // Recargar a mitad de una transcripción la cortaría: avisar y esperar
+            if (isProcessing) { addLog('warning', 'La página cambió: recarga cuando termine la transcripción'); return; }
             flushSave();
             setTimeout(() => window.location.reload(), 150);
         });
@@ -3585,6 +3614,7 @@
             if (!isProcessing || !processingId) return;
             const id = processingId;
             abortedJob = id;
+            if (uploadController) uploadController.abort();   // si aún subía, liberar la interfaz ya
             lostDuringJob = true;
             addLog('error', 'Conexión perdida con el servidor');
             markFileStatus(id, 'error');

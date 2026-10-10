@@ -40,9 +40,9 @@ def _start_template_watcher():
                         try:
                             mtime = os.path.getmtime(path)
                             if path in watched and watched[path] != mtime:
-                                socketio.emit("dev_reload", broadcast=True)
+                                socketio.emit("dev_reload")  # sin `to` ya llega a todos los clientes
                             watched[path] = mtime
-                        except OSError:
+                        except Exception:
                             pass
             time.sleep(0.5)
 
@@ -481,7 +481,9 @@ def transcribe_chunk(model, audio, chunk, suppress_ids):
         return []  # sin voz: no se usa Whisper
     params = whisper_params(suppress_ids)
     if clips:
-        params["clip_timestamps"] = [round(t, 3) for clip in clips for t in clip]
+        # Whisper solo tiene len(audio)//160 frames de mel: un fin de clip más allá hace que transcribe() no termine nunca
+        limit = (len(audio) // 160) / 100.0
+        params["clip_timestamps"] = [round(min(t, limit), 3) for clip in clips for t in clip]
     with _gpu_lock:
         result = model.transcribe(audio, **params)
     return postprocess_chunk(model, audio, chunk, result.get("segments", []), suppress_ids)
@@ -526,6 +528,14 @@ def handle_transcripcion(data):
     file_id = data.get("fileId") or filename
     num_speakers = parse_num_speakers(data.get("numSpeakers"))
     name = display_name(filename)
+    try:
+        sid, namespace = request.sid, request.namespace or "/"
+    except RuntimeError:  # llamada fuera de un evento de Socket.IO (pruebas)
+        sid, namespace = None, "/"
+
+    def client_gone():
+        # El cliente marca el trabajo como error al desconectarse: seguir solo gastaría GPU
+        return sid is not None and not socketio.server.manager.is_connected(sid, namespace)
 
     def log(tipo, mensaje):
         emit("log", {"tipo": tipo, "mensaje": mensaje})
@@ -566,6 +576,9 @@ def handle_transcripcion(data):
         except Exception as e:
             log("warning", f"[{name}] Diarización no disponible: {e}")
 
+        if client_gone():
+            print(f"[{name}] Cliente desconectado: trabajo cancelado")
+            return
         log("info", f"[{name}] Preparando audio...")
         os.makedirs(chunks_dir, exist_ok=True)
         wav_path = os.path.join(chunks_dir, "prepared.wav")
@@ -576,6 +589,9 @@ def handle_transcripcion(data):
         prev_text = None
         hablantes = None
         for chunk in chunks:
+            if client_gone():
+                print(f"[{name}] Cliente desconectado: trabajo cancelado")
+                return
             idx, total = chunk["index"], chunk["total"]
             progress(8 + int((idx - 1) / total * 88))
             log("info", f"[{name}] Parte {idx}/{total}...")
