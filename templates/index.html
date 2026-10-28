@@ -2968,6 +2968,20 @@
             setTimeout(() => URL.revokeObjectURL(url), 10000);   // revocar en el acto puede cancelar la descarga
         }
 
+        // Chromium descarta en silencio las descargas que superan ~10 por segundo (con 80 ms llegaban 12 de 15).
+        // Se encadenan cada 150 ms: cada una programa la siguiente, así un hilo ocupado nunca las amontona.
+        const DOWNLOAD_SPACING_MS = 150;
+
+        function triggerDownloadsSpaced(files) {
+            let i = 0;
+            const next = () => {
+                const f = files[i++];
+                triggerDownload(f.blob, f.fileName);
+                if (i < files.length) setTimeout(next, DOWNLOAD_SPACING_MS);
+            };
+            next();
+        }
+
         function detectFormatName(text) {
             if (/^Speaker \d+$/m.test(text)) return FORMAT_NAMES.speakers;
             if (/^Vocero$/m.test(text)) return FORMAT_NAMES.classic;
@@ -3004,11 +3018,8 @@
                 }
             });
             if (!files.length) { showToast('Sin texto para descargar'); return; }
-            // 2) Lanzar todas las descargas de golpe (~80 ms entre cada una: Chromium descarta las del mismo tick)
-            files.forEach((f, i) => {
-                if (i === 0) triggerDownload(f.blob, f.fileName);
-                else setTimeout(() => triggerDownload(f.blob, f.fileName), i * 80);
-            });
+            // 2) Lanzar las descargas seguidas, sin esperar a que termine ninguna
+            triggerDownloadsSpaced(files);
             if (files.length === 1) showToast('Descargando');
             else showToast(`Descargando ${files.length} archivos · si el navegador lo pide, permite las descargas múltiples`, 5000);
         }
